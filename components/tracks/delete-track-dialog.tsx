@@ -1,4 +1,7 @@
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,10 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
-
 import { api } from "@/lib/api";
-import { Loader2 } from "lucide-react";
 import { Track } from "@/lib/schemas";
 
 interface DeleteTrackDialogProps {

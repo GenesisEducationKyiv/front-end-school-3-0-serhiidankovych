@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
-import { Play, Pause, Volume2, VolumeX, X, Music } from "lucide-react";
 import { useWavesurfer } from "@wavesurfer/react";
+import { Music,Pause, Play, Volume2, VolumeX, X } from "lucide-react";
 import Image from "next/image";
+import { useCallback,useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-
 import { api } from "@/lib/api";
-import { toast } from "sonner";
 import { Track } from "@/types";
 
 interface AudioPlayerProps {

@@ -1,23 +1,24 @@
+import { AlertCircle, Loader2, Pencil, PlusCircle } from "lucide-react";
+import { ResultAsync } from "neverthrow";
 import { useState } from "react";
-import { TrackForm } from "./track-form";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-import { api, ApiError } from "@/lib/api";
-import { Loader2, AlertCircle, Pencil, PlusCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ResultAsync } from "neverthrow";
+import { api, ApiError } from "@/lib/api";
 import { Track, TrackFormData } from "@/lib/schemas";
+
+import { TrackForm } from "./track-form";
 
 interface TrackModalProps {
   isOpen: boolean;

@@ -1,13 +1,18 @@
 "use client";
 
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  Edit,
+  Image as ImageIcon,
+  MoreHorizontal,
+  Pause,
+  Play,
+  Trash2,
+  Upload,
+} from "lucide-react";
+import Image from "next/image";
+import { useMemo } from "react";
+
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
@@ -17,20 +22,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-
 import {
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Upload,
-  Play,
-  Pause,
-  Image as ImageIcon,
-} from "lucide-react";
-import Image from "next/image";
-import { useMemo } from "react";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Track } from "@/lib/schemas";
 
 interface TrackListProps {

@@ -1,19 +1,19 @@
 
-import { useState, useRef, useEffect } from "react";
+import { FileAudio, Loader2,Trash, Upload, X } from "lucide-react";
+import { useEffect,useRef, useState } from "react";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-
-import { api } from "@/lib/api";
-import { Upload, X, FileAudio, Trash, Loader2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { api } from "@/lib/api";
 import { Track } from "@/lib/schemas";
 
 interface UploadTrackModalProps {

@@ -1,13 +1,15 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { ResultAsync } from "neverthrow";
 import { z } from "zod";
+
 import { ServerErrorPayload, TrackFilters } from "@/types";
+
 import {
   PaginatedTrackResponseSchema,
+  ResponseSchema,
+  TrackFormData,
   TrackFormSchema,
   TrackSchema,
-  TrackFormData,
-  ResponseSchema,
 } from "./schemas";
 
 const SERVER_BASE_URL = "http://localhost:8000";

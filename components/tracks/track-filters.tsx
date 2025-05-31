@@ -1,6 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Search } from "lucide-react";
+import { ResultAsync } from "neverthrow";
+import { useEffect,useState } from "react";
+
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -10,9 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
-import { Search } from "lucide-react";
 import { ComponentTrackFilters } from "@/types";
-import { ResultAsync } from "neverthrow";
 
 interface TrackFiltersProps {
   filters: ComponentTrackFilters;
