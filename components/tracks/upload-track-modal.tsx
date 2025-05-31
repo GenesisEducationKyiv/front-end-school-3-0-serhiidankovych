@@ -106,16 +106,14 @@ export function UploadTrackModal({
   const handleUpload = async () => {
     if (!selectedFile || !track?.id) return;
 
-    let progressTimer: NodeJS.Timeout | null = null;
     setIsUploading(true);
+    setUploadProgress(0);
+    let progressTimer: NodeJS.Timeout | null = null;
 
     try {
       progressTimer = simulateProgress();
 
-      const response = await api.uploadTrackAudio(track.id, selectedFile);
-      const updatedTrack = await response.json();
-
-      console.log("Updated track:", updatedTrack);
+      await api.uploadTrackAudio(track.id, selectedFile);
 
       setUploadProgress(100);
 
@@ -132,18 +130,14 @@ export function UploadTrackModal({
     } catch (error) {
       if (progressTimer) clearInterval(progressTimer);
       setUploadProgress(0);
-
-      console.error("Failed to upload audio file:", error);
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "An unknown error occurred during upload.";
+      setIsUploading(false);
 
       toast.error("Upload failed", {
-        description: errorMessage,
+        description:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred during upload.",
       });
-
-      setIsUploading(false);
     }
   };
 
@@ -340,8 +334,8 @@ export function UploadTrackModal({
               {isUploading
                 ? "Uploading..."
                 : audioUrl
-                ? "Replace File"
-                : "Upload File"}
+                  ? "Replace File"
+                  : "Upload File"}
             </Button>
           )}
         </DialogFooter>

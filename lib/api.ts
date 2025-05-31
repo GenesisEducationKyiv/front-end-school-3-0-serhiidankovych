@@ -1,155 +1,114 @@
-import { Track, TrackFilters, TrackFormData, PaginatedResponse } from "@/types";
+import axios, { AxiosError } from "axios";
+import {
+  PaginatedResponse,
+  ServerErrorPayload,
+  Track,
+  TrackFilters,
+  TrackFormData,
+} from "@/types";
 
-const API_BASE_URL = "http://localhost:8000/api";
 const SERVER_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = `${SERVER_BASE_URL}/api`;
 const STATIC_FILES_PREFIX = "/api/files/";
 
 class ApiError extends Error {
   constructor(
-    public message: string,
-    public status?: number,
-    public data?: unknown
+    message: string,
+    public status: number,
+    public data: ServerErrorPayload
   ) {
     super(message);
     this.name = "ApiError";
   }
 }
 
-async function handleResponse<T>(response: Response): Promise<T> {
-  const contentType = response.headers.get("content-type");
-  const isJson = contentType?.includes("application/json");
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: { "Content-Type": "application/json" },
+});
 
-  if (!response.ok) {
-    const errorData = isJson ? await response.json() : null;
-    throw new ApiError(
-      errorData?.message || response.statusText,
-      response.status,
-      errorData
-    );
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error: AxiosError<ServerErrorPayload>) => {
+    const status = error.response?.status ?? 500;
+    const data = error.response?.data ?? { error: "Unknown error" };
+    throw new ApiError(data.error, status, data);
   }
-
-  if (response.status === 204) {
-    return undefined as unknown as T;
-  }
-
-  return isJson ? response.json() : (response.text() as unknown as T);
-}
+);
 
 function buildQueryParams(filters: TrackFilters): string {
   const params = new URLSearchParams();
-
   Object.entries(filters).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== "") {
+    if (value != null && value !== "") {
       params.append(key, String(value));
     }
   });
-
   return params.toString();
 }
 
 export const api = {
   async getTracks(filters: TrackFilters): Promise<PaginatedResponse<Track>> {
     const query = buildQueryParams(filters);
-    const response = await fetch(`${API_BASE_URL}/tracks?${query}`);
-    return handleResponse<PaginatedResponse<Track>>(response);
+    const response = await apiClient.get(`/tracks?${query}`);
+    return response.data;
   },
 
   async getTrack(slugOrId: string): Promise<Track> {
-    const response = await fetch(`${API_BASE_URL}/tracks/${slugOrId}`);
-    return handleResponse<Track>(response);
+    const response = await apiClient.get(`/tracks/${slugOrId}`);
+    return response.data;
   },
 
   async createTrack(data: TrackFormData): Promise<Track> {
-    const response = await fetch(`${API_BASE_URL}/tracks`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    return handleResponse<Track>(response);
+    const response = await apiClient.post("/tracks", data);
+    return response.data;
   },
 
   async updateTrack(id: string, data: Partial<TrackFormData>): Promise<Track> {
-    const response = await fetch(`${API_BASE_URL}/tracks/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    return handleResponse<Track>(response);
+    const response = await apiClient.put(`/tracks/${id}`, data);
+    return response.data;
   },
 
   async deleteTrack(id: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/tracks/${id}`, {
-      method: "DELETE",
-    });
-    await handleResponse<void>(response);
+    await apiClient.delete(`/tracks/${id}`);
   },
 
   async multipleDeleteTracks(
     ids: string[]
   ): Promise<{ success: string[]; failed: string[] }> {
-    const response = await fetch(`${API_BASE_URL}/tracks/delete`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids }),
-    });
-    return handleResponse<{ success: string[]; failed: string[] }>(response);
+    const response = await apiClient.post("/tracks/delete", { ids });
+    return response.data;
   },
 
-  getTrackAudioUrl(audioFileName: string | null): string | null {
-    if (!audioFileName) return null;
-    const encodedFileName = encodeURIComponent(audioFileName);
-    return `${SERVER_BASE_URL}${STATIC_FILES_PREFIX}${encodedFileName}`;
-  },
-
-  async uploadTrackAudio(id: string, file: File): Promise<Response> {
+  async uploadTrackAudio(id: string, file: File): Promise<void> {
     const formData = new FormData();
     formData.append("file", file);
-    const response = await fetch(`${API_BASE_URL}/tracks/${id}/upload`, {
-      method: "POST",
-      body: formData,
+
+    await apiClient.post(`/tracks/${id}/upload`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Upload error details:", {
-        status: response.status,
-        statusText: response.statusText,
-        body: errorText,
-      });
-      throw new Error(
-        `Upload failed: ${response.status} ${response.statusText}`
-      );
-    }
-
-    return response;
   },
 
   async removeTrackAudio(id: string): Promise<Track> {
-    const response = await fetch(`${API_BASE_URL}/tracks/${id}/file`, {
-      method: "DELETE",
-    });
-    return handleResponse<Track>(response);
+    const response = await apiClient.delete(`/tracks/${id}/file`);
+    return response.data;
   },
 
   async getArtists(): Promise<string[]> {
-    try {
-      const response = await this.getTracks({
-        limit: 999,
-        page: 1,
-      });
-      const artists = new Set<string>();
-      response.data.forEach(
-        (track) => track.artist && artists.add(track.artist)
-      );
-      return Array.from(artists).sort();
-    } catch (error) {
-      console.error("Failed to get artists:", error);
-      return [];
-    }
+    const { data } = await this.getTracks({ limit: 999, page: 1 });
+    const artists = Array.from(
+      new Set(data.map((t) => t.artist).filter((a): a is string => Boolean(a)))
+    );
+    return artists.sort();
   },
 
   async getGenres(): Promise<string[]> {
-    const response = await fetch(`${API_BASE_URL}/genres`);
-    return handleResponse<string[]>(response);
+    const response = await apiClient.get("/genres");
+    return response.data;
+  },
+
+  getTrackAudioUrl(audioFileName: string | null): string | null {
+    return audioFileName
+      ? `${SERVER_BASE_URL}${STATIC_FILES_PREFIX}${encodeURIComponent(audioFileName)}`
+      : null;
   },
 };
