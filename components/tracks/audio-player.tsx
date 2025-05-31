@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Track } from "@/types";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 interface AudioPlayerProps {
   track: Track;
@@ -56,9 +57,11 @@ export function AudioPlayer({
       }),
       wavesurfer.on("timeupdate", setCurrentTime),
       wavesurfer.on("finish", () => handlePlay(track)),
-      wavesurfer.on("error", (err) => {
-        console.error("Wavesurfer error:", err);
+      wavesurfer.on("error", () => {
         setHasError(true);
+        toast.error("Playback error", {
+          description: "Failed to play audio track",
+        });
       }),
     ];
 
@@ -79,7 +82,9 @@ export function AudioPlayer({
           })
           .catch((error) => {
             if (error.name !== "AbortError") {
-              console.error("Play error:", error);
+              toast.error("Playback error", {
+                description: "Failed to play audio track",
+              });
             }
             setIsPlayPending(false);
           });
@@ -118,7 +123,7 @@ export function AudioPlayer({
 
   return (
     <div
-      className="p-3 bg-card text-card-foreground  shadow-md max-w-full space-y-3 relative"
+      className="p-3 bg-card text-card-foreground shadow-md max-w-full space-y-3 relative"
       data-testid={`audio-player-${track.id}`}
     >
       <Button
@@ -129,10 +134,6 @@ export function AudioPlayer({
       >
         <X className="h-4 w-4" />
       </Button>
-
-      {hasError && (
-        <p className="text-xs text-red-500 text-center">Playback error</p>
-      )}
 
       <div className="flex items-center justify-start sm:justify-around gap-3 flex-wrap">
         <div className="flex items-center gap-3 min-w-[100px]">

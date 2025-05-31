@@ -50,6 +50,180 @@ interface TrackListProps {
 
 const SKELETON_ROWS = 5;
 
+const TrackListSkeleton = () => (
+  <div className="rounded-md border" data-testid="loading-tracks">
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead className="w-[40px] pl-4">
+            <Skeleton className="h-4 w-4" />
+          </TableHead>
+          <TableHead className="w-[60px]" />
+          <TableHead>Title</TableHead>
+          <TableHead>Artist</TableHead>
+          <TableHead className="hidden md:table-cell">Album</TableHead>
+          <TableHead className="hidden sm:table-cell">Genres</TableHead>
+          <TableHead className="text-right w-[80px] pr-4">Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {Array.from({ length: SKELETON_ROWS }).map((_, index) => (
+          <TableRow key={`skeleton-${index}`}>
+            <TableCell className="pl-4">
+              <Skeleton className="h-4 w-4" />
+            </TableCell>
+            <TableCell>
+              <Skeleton className="h-10 w-10 rounded" />
+            </TableCell>
+            <TableCell>
+              <Skeleton className="h-4 w-40" />
+            </TableCell>
+            <TableCell>
+              <Skeleton className="h-4 w-32" />
+            </TableCell>
+            <TableCell className="hidden md:table-cell">
+              <Skeleton className="h-4 w-24" />
+            </TableCell>
+            <TableCell className="hidden sm:table-cell">
+              <Skeleton className="h-4 w-20" />
+            </TableCell>
+            <TableCell className="text-right pr-4">
+              <Skeleton className="h-8 w-8 ml-auto" />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  </div>
+);
+
+const TrackListError = ({ message }: { message: string }) => (
+  <div
+    className="flex justify-center items-center h-40 border rounded-md bg-destructive/10 text-destructive"
+    data-testid="track-list-error"
+  >
+    <p>Error loading tracks: {message}</p>
+  </div>
+);
+
+const TrackCoverImage = ({ track }: { track: Track }) => (
+  <div className="relative h-10 w-10 rounded overflow-hidden">
+    {track.coverImage ? (
+      <Image
+        src={track.coverImage}
+        alt={`${track.title} cover`}
+        fill
+        className="object-cover"
+        sizes="40px"
+      />
+    ) : (
+      <div className="h-10 w-10 bg-muted flex items-center justify-center">
+        <ImageIcon className="h-4 w-4 text-muted-foreground" />
+      </div>
+    )}
+  </div>
+);
+
+const TrackPlayButton = ({
+  track,
+  isCurrentlyPlaying,
+  onPlay,
+}: {
+  track: Track;
+  isCurrentlyPlaying: boolean;
+  onPlay: (track: Track) => void;
+}) => (
+  <Button
+    variant="ghost"
+    size="icon"
+    className="absolute inset-0 bg-black/40 hover:bg-black/60 transition-colors h-full w-full rounded-none"
+    onClick={() => onPlay(track)}
+    title={isCurrentlyPlaying ? "Pause track" : "Play track"}
+    data-testid={`play-button-${track.id}`}
+  >
+    {isCurrentlyPlaying ? (
+      <Pause className="h-4 w-4 text-white" />
+    ) : (
+      <Play className="h-4 w-4 text-white" />
+    )}
+  </Button>
+);
+
+const TrackActionsMenu = ({
+  track,
+  onEdit,
+  onDelete,
+  onUpload,
+  onPlay,
+  isCurrentlyPlaying,
+  hasAudio,
+}: {
+  track: Track;
+  onEdit: (track: Track) => void;
+  onDelete: (track: Track) => void;
+  onUpload: (track: Track) => void;
+  onPlay: (track: Track) => void;
+  isCurrentlyPlaying: boolean;
+  hasAudio: boolean;
+}) => (
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button
+        variant="ghost"
+        className="h-8 w-8 p-0"
+        data-testid={`actions-trigger-${track.id}`}
+      >
+        <span className="sr-only">Open menu</span>
+        <MoreHorizontal className="h-4 w-4" />
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="end">
+      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+      <DropdownMenuItem
+        onClick={() => onEdit(track)}
+        data-testid={`edit-track-${track.id}`}
+      >
+        <Edit className="mr-2 h-4 w-4" />
+        <span>Edit Details</span>
+      </DropdownMenuItem>
+      <DropdownMenuItem
+        onClick={() => onUpload(track)}
+        data-testid={`upload-track-${track.id}`}
+      >
+        <Upload className="mr-2 h-4 w-4" />
+        <span>{hasAudio ? "Update Audio" : "Upload Audio"}</span>
+      </DropdownMenuItem>
+      {hasAudio && (
+        <DropdownMenuItem
+          onClick={() => onPlay(track)}
+          data-testid={`play-track-${track.id}`}
+        >
+          {isCurrentlyPlaying ? (
+            <>
+              <Pause className="mr-2 h-4 w-4" />
+              <span>Pause Track</span>
+            </>
+          ) : (
+            <>
+              <Play className="mr-2 h-4 w-4" />
+              <span>Play Track</span>
+            </>
+          )}
+        </DropdownMenuItem>
+      )}
+      <DropdownMenuSeparator />
+      <DropdownMenuItem
+        onClick={() => onDelete(track)}
+        className="text-red-600 focus:text-red-600"
+        data-testid={`delete-track-${track.id}`}
+      >
+        <Trash2 className="mr-2 h-4 w-4" />
+        <span>Delete Track</span>
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+);
+
 export function TrackList({
   tracks,
   isLoading,
@@ -79,71 +253,8 @@ export function TrackList({
     return false;
   }, [allVisibleSelected, someVisibleSelected]);
 
-  if (isLoading) {
-    return (
-      <div
-        className="rounded-md border"
-        data-testid="loading-tracks"
-        data-loading={isLoading}
-      >
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[40px] pl-4">
-                <Skeleton className="h-4 w-4" />
-              </TableHead>
-              <TableHead className="w-[60px]"></TableHead>
-              <TableHead>Title</TableHead>
-              <TableHead>Artist</TableHead>
-              <TableHead className="hidden md:table-cell">Album</TableHead>
-              <TableHead className="hidden sm:table-cell">Genres</TableHead>
-              <TableHead className="text-right w-[80px] pr-4">
-                Actions
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {Array.from({ length: SKELETON_ROWS }).map((_, index) => (
-              <TableRow key={`skeleton-${index}`}>
-                <TableCell className="pl-4">
-                  <Skeleton className="h-4 w-4" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-10 w-10 rounded" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-4 w-40" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-4 w-32" />
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  <Skeleton className="h-4 w-24" />
-                </TableCell>
-                <TableCell className="hidden sm:table-cell">
-                  <Skeleton className="h-4 w-20" />
-                </TableCell>
-                <TableCell className="text-right pr-4">
-                  <Skeleton className="h-8 w-8 ml-auto" />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div
-        className="flex justify-center items-center h-40 border rounded-md bg-destructive/10 text-destructive"
-        data-testid="track-list-error"
-      >
-        <p>Error loading tracks: {error.message}</p>
-      </div>
-    );
-  }
+  if (isLoading) return <TrackListSkeleton />;
+  if (error) return <TrackListError message={error.message} />;
 
   return (
     <div className="rounded-md border" data-testid="track-list-data">
@@ -162,7 +273,7 @@ export function TrackList({
                 />
               )}
             </TableHead>
-            <TableHead className="w-[60px]"></TableHead>
+            <TableHead className="w-[60px]" />
             <TableHead>Title</TableHead>
             <TableHead>Artist</TableHead>
             <TableHead className="hidden md:table-cell">Album</TableHead>
@@ -200,36 +311,13 @@ export function TrackList({
                 </TableCell>
                 <TableCell className="pl-0">
                   <div className="relative h-10 w-10 rounded overflow-hidden">
-                    {track.coverImage ? (
-                      <Image
-                        src={track.coverImage}
-                        alt={`${track.title} cover`}
-                        fill
-                        className="object-cover"
-                        sizes="40px"
-                      />
-                    ) : (
-                      <div className="h-10 w-10 bg-muted flex items-center justify-center">
-                        <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                    )}
+                    <TrackCoverImage track={track} />
                     {hasAudio && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="absolute inset-0 bg-black/40 hover:bg-black/60 transition-colors h-full w-full rounded-none"
-                        onClick={() => onPlay(track)}
-                        title={
-                          isCurrentlyPlaying ? "Pause track" : "Play track"
-                        }
-                        data-testid={`play-button-${track.id}`}
-                      >
-                        {isCurrentlyPlaying ? (
-                          <Pause className="h-4 w-4 text-white" />
-                        ) : (
-                          <Play className="h-4 w-4 text-white" />
-                        )}
-                      </Button>
+                      <TrackPlayButton
+                        track={track}
+                        isCurrentlyPlaying={isCurrentlyPlaying}
+                        onPlay={onPlay}
+                      />
                     )}
                   </div>
                 </TableCell>
@@ -246,69 +334,18 @@ export function TrackList({
                   {track.album || "-"}
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">
-                  {track.genres && track.genres.length > 0
-                    ? track.genres.join(", ")
-                    : "-"}
+                  {track.genres?.join(", ") || "-"}
                 </TableCell>
                 <TableCell className="text-right pr-4">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="h-8 w-8 p-0"
-                        data-testid={`actions-trigger-${track.id}`}
-                      >
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem
-                        onClick={() => onEdit(track)}
-                        data-testid={`edit-track-${track.id}`}
-                      >
-                        <Edit className="mr-2 h-4 w-4" />
-                        <span>Edit Details</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => onUpload(track)}
-                        data-testid={`upload-track-${track.id}`}
-                      >
-                        <Upload className="mr-2 h-4 w-4" />
-                        <span>
-                          {hasAudio ? "Update Audio" : "Upload Audio"}
-                        </span>
-                      </DropdownMenuItem>
-                      {hasAudio && (
-                        <DropdownMenuItem
-                          onClick={() => onPlay(track)}
-                          data-testid={`play-track-${track.id}`}
-                        >
-                          {isCurrentlyPlaying ? (
-                            <>
-                              <Pause className="mr-2 h-4 w-4" />
-                              <span>Pause Track</span>
-                            </>
-                          ) : (
-                            <>
-                              <Play className="mr-2 h-4 w-4" />
-                              <span>Play Track</span>
-                            </>
-                          )}
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => onDelete(track)}
-                        className="text-red-600 focus:text-red-600 "
-                        data-testid={`delete-track-${track.id}`}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        <span>Delete Track</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <TrackActionsMenu
+                    track={track}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    onUpload={onUpload}
+                    onPlay={onPlay}
+                    isCurrentlyPlaying={isCurrentlyPlaying}
+                    hasAudio={hasAudio}
+                  />
                 </TableCell>
               </TableRow>
             );
