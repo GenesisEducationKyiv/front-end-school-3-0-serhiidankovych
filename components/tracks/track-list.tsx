@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Track } from "@/types";
+
 import {
   MoreHorizontal,
   Edit,
@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useMemo } from "react";
+import { Track } from "@/lib/schemas";
 
 interface TrackListProps {
   tracks: Track[];

@@ -11,12 +11,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Track, TrackFormData } from "@/types";
+
 import { api, ApiError } from "@/lib/api";
 import { Loader2, AlertCircle, Pencil, PlusCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ResultAsync } from "neverthrow";
+import { Track, TrackFormData } from "@/lib/schemas";
 
 interface TrackModalProps {
   isOpen: boolean;
@@ -79,14 +80,9 @@ export function TrackModal({
       parentOnSuccess(processedTrack);
       if (!isEditMode) onClose();
     } else {
-      const error = result.error;
-      const operationType = isEditMode ? "update" : "create";
-
-      console.error(`Failed to ${operationType} track:`, error);
-      setError(error.message);
-      toast.error(`${operationType} failed`, {
-        description: error.message,
-      });
+      const err = result.error;
+      const message = err.data?.error ?? `Unexpected error (${err.status})`;
+      setError(message);
     }
 
     setIsSubmitting(false);

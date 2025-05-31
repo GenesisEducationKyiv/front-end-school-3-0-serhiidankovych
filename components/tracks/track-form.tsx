@@ -14,16 +14,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2, X, FileImage, CheckCircle, AlertCircle } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { TrackFormData as TrackFormDataType } from "@/types";
+
 import { api } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
-import { trackFormSchema } from "@/lib/schemas";
-import { toast } from "sonner";
+
+import { TrackFormData, TrackFormSchema } from "@/lib/schemas";
 
 interface TrackFormProps {
-  initialData?: Partial<TrackFormDataType>;
-  onSubmit: (data: TrackFormDataType) => void | Promise<void>;
+  initialData?: Partial<TrackFormData>;
+  onSubmit: (data: TrackFormData) => void | Promise<void>;
   isSubmitting?: boolean;
   id?: string;
 }
@@ -34,8 +34,8 @@ export function TrackForm({
   isSubmitting = false,
   id,
 }: TrackFormProps) {
-  const form = useForm<TrackFormDataType>({
-    resolver: zodResolver(trackFormSchema),
+  const form = useForm<TrackFormData>({
+    resolver: zodResolver(TrackFormSchema),
     defaultValues: {
       title: initialData.title || "",
       artist: initialData.artist || "",
@@ -130,6 +130,7 @@ export function TrackForm({
       });
     }
     setIsVerifyingImage(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form, verifyImageUrl]);
 
   useEffect(() => {
@@ -178,13 +179,6 @@ export function TrackForm({
       if (genresResult.isOk()) {
         setAvailableGenres(genresResult.value);
       } else {
-        const errorMessage = genresResult.error.message;
-        console.error("Failed to fetch genres:", errorMessage);
-        setGenreLoadError(errorMessage);
-
-        toast.error("Failed to load genres", {
-          description: errorMessage,
-        });
       }
 
       setIsLoadingGenres(false);
@@ -214,7 +208,7 @@ export function TrackForm({
     form.setValue("genres", newGenres, { shouldValidate: true });
   };
 
-  const handleSubmit = (data: TrackFormDataType) => {
+  const handleSubmit = (data: TrackFormData) => {
     onSubmit(data);
   };
 
@@ -477,7 +471,6 @@ export function TrackForm({
                     if (result.isOk()) {
                       setAvailableGenres(result.value);
                     } else {
-                      setGenreLoadError(result.error.message);
                     }
                     setIsLoadingGenres(false);
                   };

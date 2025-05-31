@@ -10,9 +10,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Track } from "@/types";
+
 import { api } from "@/lib/api";
 import { Loader2 } from "lucide-react";
+import { Track } from "@/lib/schemas";
 
 interface DeleteTrackDialogProps {
   isOpen: boolean;
@@ -76,10 +77,8 @@ export function DeleteTrackDialog({
 
         parentOnSuccess();
       } else {
-        const err = result.error;
-        console.error(`Failed to delete track(s)`, err);
         toast.error("Delete failed", {
-          description: err.message || "An unknown error occurred",
+          description: "An unknown error occurred",
         });
       }
     } finally {

@@ -10,10 +10,11 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Track } from "@/types";
+
 import { api } from "@/lib/api";
 import { Upload, X, FileAudio, Trash, Loader2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Track } from "@/lib/schemas";
 
 interface UploadTrackModalProps {
   isOpen: boolean;
@@ -110,9 +111,9 @@ export function UploadTrackModal({
     
     setUploadProgress(0);
     setIsUploading(false);
-    console.error("Upload error:", result.error);
+    
     toast.error("Upload failed", {
-      description: result.error.message || "An unexpected error occurred during upload.",
+      description: "An unexpected error occurred during upload.",
     });
   }
 };
@@ -135,7 +136,7 @@ const handleRemoveFile = async () => {
     
     setIsRemoving(false);
     toast.error("Failed to remove file", {
-      description: result.error.message || "An unknown error occurred while removing the file.",
+      description:  "An unknown error occurred while removing the file.",
     });
   }
 };

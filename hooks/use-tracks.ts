@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { api, ApiError } from "@/lib/api";
-import { Track, ComponentTrackFilters } from "@/types";
+import { ComponentTrackFilters } from "@/types";
+
 import { ResultAsync } from "neverthrow";
+import { Track } from "@/lib/schemas";
 
 export const ITEMS_PER_PAGE = 10;
 
@@ -65,9 +67,6 @@ export function useTracks() {
         setTotalTracks(0);
       }
     } else {
-      const apiError = result.error;
-
-      setError(apiError.message);
       setTracks([]);
       setTotalTracks(0);
     }
@@ -95,9 +94,9 @@ export function useTracks() {
       onSuccess?.(result.value);
     } else {
       const err = result.error;
-
+      const message = err.data?.error ?? `Unexpected error (${err.status})`;
+      setError(message);
       onError?.(err);
-      setError(err.message);
     }
   };
 

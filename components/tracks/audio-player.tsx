@@ -6,9 +6,10 @@ import { useWavesurfer } from "@wavesurfer/react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Track } from "@/types";
+
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { Track } from "@/types";
 
 interface AudioPlayerProps {
   track: Track;
