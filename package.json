@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint:fix": "next lint --fix"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
@@ -23,9 +24,11 @@
     "@radix-ui/react-tabs": "^1.1.9",
     "@radix-ui/react-tooltip": "^1.2.4",
     "@wavesurfer/react": "^1.0.11",
+    "axios": "^1.9.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.501.0",
+    "neverthrow": "^8.2.0",
     "next": "15.3.1",
     "next-themes": "^0.4.6",
     "react": "^19.0.0",
@@ -42,8 +45,15 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@typescript-eslint/parser": "^8.33.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.1",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-playwright": "^2.2.0",
+    "eslint-plugin-prettier": "^5.4.1",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "eslint-plugin-unicorn": "^59.0.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

@@ -46,3 +46,7 @@ export interface ComponentTrackFilters {
   sort?: "title" | "artist" | "album" | "createdAt";
   order?: "asc" | "desc";
 }
+
+export interface ServerErrorPayload {
+  error: string;
+}

@@ -1,4 +1,7 @@
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,9 +12,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
-import { Track } from "@/types";
 import { api } from "@/lib/api";
+import { Track } from "@/lib/schemas";
 
 interface DeleteTrackDialogProps {
   isOpen: boolean;
@@ -24,7 +26,7 @@ export function DeleteTrackDialog({
   isOpen,
   onClose,
   tracksToDelete,
-  onSuccess,
+  onSuccess: parentOnSuccess,
 }: DeleteTrackDialogProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -38,43 +40,50 @@ export function DeleteTrackDialog({
     }
 
     setIsDeleting(true);
-    try {
-      if (isMultiple) {
-        const result = await api.multipleDeleteTracks(trackIdsToDelete);
 
-        if (result.failed && result.failed.length > 0) {
-          toast.warning(
-            `${result.success.length} tracks deleted, ${result.failed.length} failed.`,
-            {
-              description: `Failed IDs: ${result.failed.join(", ")}`,
-            }
-          );
+    try {
+      const result = isMultiple
+        ? await api.multipleDeleteTracks(trackIdsToDelete)
+        : await api.deleteTrack(trackIdsToDelete[0]);
+
+      if (result.isOk()) {
+        const data = result.value;
+
+        if (isMultiple) {
+          const multipleDeleteData = data as {
+            success: string[];
+            failed: string[];
+          };
+          if (multipleDeleteData.failed?.length > 0) {
+            toast.warning(
+              `${multipleDeleteData.success.length} tracks deleted, ${multipleDeleteData.failed.length} failed.`,
+              {
+                description: `Failed IDs: ${multipleDeleteData.failed.join(
+                  ", "
+                )}`,
+              }
+            );
+          } else {
+            toast.success(`${trackIdsToDelete.length} Tracks deleted`, {
+              description: `The selected tracks have been deleted successfully.`,
+            });
+          }
         } else {
-          toast.success(`${trackIdsToDelete.length} Tracks deleted`, {
-            description: `The selected tracks have been deleted successfully.`,
+          const singleTrackTitle = tracksToDelete[0]?.title || "this track";
+          toast.success("Track deleted", {
+            description: `"${singleTrackTitle}" has been deleted successfully.`,
           });
         }
-      } else {
-        const singleTrackId = trackIdsToDelete[0];
-        const singleTrackTitle = tracksToDelete[0]?.title || "this track";
 
-        await api.deleteTrack(singleTrackId);
-        toast.success("Track deleted", {
-          description: `"${singleTrackTitle}" has been deleted successfully.`,
+        parentOnSuccess();
+      } else {
+        toast.error("Delete failed", {
+          description: "An unknown error occurred",
         });
       }
-
-      onSuccess();
-    } catch (error) {
-      console.error(`Failed to delete track(s)`, error);
-      const errorMessage =
-        error instanceof Error ? error.message : "An unknown error occurred";
-
-      toast.error("Delete failed", {
-        description: errorMessage,
-      });
     } finally {
       setIsDeleting(false);
+      onClose();
     }
   };
 
@@ -120,11 +129,16 @@ export function DeleteTrackDialog({
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90 focus:ring-destructive"
             data-testid="confirm-delete"
           >
-            {isDeleting
-              ? "Deleting..."
-              : isMultiple
-              ? `Delete ${tracksToDelete.length} Tracks`
-              : "Delete Track"}
+            {isDeleting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Deleting...
+              </>
+            ) : isMultiple ? (
+              `Delete ${tracksToDelete.length} Tracks`
+            ) : (
+              "Delete Track"
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

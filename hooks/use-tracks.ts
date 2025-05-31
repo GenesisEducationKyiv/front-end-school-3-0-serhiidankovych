@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
-import { api } from "@/lib/api";
-import { Track, ComponentTrackFilters } from "@/types";
+import { api, ApiError } from "@/lib/api";
+import { ComponentTrackFilters } from "@/types";
+
+import { ResultAsync } from "neverthrow";
+import { Track } from "@/lib/schemas";
 
 export const ITEMS_PER_PAGE = 10;
 
@@ -13,7 +16,6 @@ export function useTracks() {
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [totalTracks, setTotalTracks] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-
   const [filters, setFilters] = useState<ComponentTrackFilters>({
     search: "",
     genre: undefined,
@@ -27,7 +29,6 @@ export function useTracks() {
   const updateFilters = useCallback(
     (newFilters: Partial<ComponentTrackFilters>) => {
       setFilters((prev) => ({ ...prev, ...newFilters }));
-
       if (
         Object.keys(newFilters).some(
           (key) => key !== "search" || newFilters.search === ""
@@ -35,7 +36,6 @@ export function useTracks() {
       ) {
         setCurrentPage(1);
       }
-
       if (Object.keys(newFilters).length > 0) {
         setIsRefreshing(true);
       }
@@ -47,33 +47,32 @@ export function useTracks() {
     setIsLoading(true);
     setError(null);
 
-    try {
-      const apiFilters = {
-        ...filters,
-        page: currentPage,
-        limit: ITEMS_PER_PAGE,
-        search: debouncedSearch || undefined,
-      };
+    const apiFilters = {
+      ...filters,
+      page: currentPage,
+      limit: ITEMS_PER_PAGE,
+      search: debouncedSearch || undefined,
+    };
 
-      const response = await api.getTracks(apiFilters);
+    const result = await api.getTracks(apiFilters);
 
+    if (result.isOk()) {
+      const response = result.value;
       if (response?.data && Array.isArray(response.data)) {
         setTracks(response.data);
         setTotalTracks(response.meta.total);
       } else {
-        throw new Error("Invalid response structure");
+        setError("Invalid response structure");
+        setTracks([]);
+        setTotalTracks(0);
       }
-    } catch (err) {
-      console.error("Failed to fetch tracks:", err);
-      setError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      );
+    } else {
       setTracks([]);
       setTotalTracks(0);
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
     }
+
+    setIsLoading(false);
+    setIsRefreshing(false);
   }, [currentPage, debouncedSearch, filters]);
 
   useEffect(() => {
@@ -82,6 +81,23 @@ export function useTracks() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+  };
+
+  const handleTrackOperation = async <T>(
+    operation: () => ResultAsync<T, ApiError>,
+    onSuccess?: (data: T) => void,
+    onError?: (error: ApiError) => void
+  ) => {
+    const result = await operation();
+
+    if (result.isOk()) {
+      onSuccess?.(result.value);
+    } else {
+      const err = result.error;
+      const message = err.data?.error ?? `Unexpected error (${err.status})`;
+      setError(message);
+      onError?.(err);
+    }
   };
 
   return {
@@ -94,10 +110,10 @@ export function useTracks() {
     currentPage,
     filters,
     ITEMS_PER_PAGE,
-
     fetchTracks,
     handlePageChange,
     updateFilters,
     setCurrentTrack,
+    handleTrackOperation,
   };
 }

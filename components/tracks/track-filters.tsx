@@ -1,6 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Search } from "lucide-react";
+import { ResultAsync } from "neverthrow";
+import { useEffect,useState } from "react";
+
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -10,8 +13,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
-import { Search } from "lucide-react";
-
 import { ComponentTrackFilters } from "@/types";
 
 interface TrackFiltersProps {
@@ -27,21 +28,28 @@ export function TrackFilters({ filters, updateFilters }: TrackFiltersProps) {
   useEffect(() => {
     const fetchFilterOptions = async () => {
       setIsLoading(true);
-      try {
-        const [genresData, artistsData] = await Promise.all([
-          api.getGenres(),
-          api.getArtists(),
-        ]);
 
-        setGenres(genresData || [""]);
-        setArtists(artistsData || []);
-      } catch (error) {
-        console.error("Failed to fetch filter options:", error);
+      const genresResult = api.getGenres();
+      const artistsResult = api.getArtists();
+
+      const [genresData, artistsData] = await ResultAsync.combine([
+        genresResult,
+        artistsResult,
+      ]).unwrapOr([[], []]);
+
+      if (Array.isArray(genresData)) {
+        setGenres(genresData);
+      } else {
         setGenres([]);
-        setArtists([]);
-      } finally {
-        setIsLoading(false);
       }
+
+      if (Array.isArray(artistsData)) {
+        setArtists(artistsData);
+      } else {
+        setArtists([]);
+      }
+
+      setIsLoading(false);
     };
 
     fetchFilterOptions();

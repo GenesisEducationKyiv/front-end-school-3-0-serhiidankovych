@@ -1,16 +1,17 @@
 "use client";
-import { useState, useMemo } from "react";
-import { TrackList } from "@/components/tracks/track-list";
-import { TrackFilters } from "@/components/tracks/track-filters";
-import { AudioPlayer } from "@/components/tracks/audio-player";
+import { AlertCircle, CopyX,Loader2, Plus, Trash2 } from "lucide-react";
+import { useMemo,useState } from "react";
+
 import { Pagination } from "@/components/pagination";
-import { Button } from "@/components/ui/button";
-import { Plus, AlertCircle, Loader2, Trash2, CopyX } from "lucide-react";
-import { useTracks } from "@/hooks/use-tracks";
-import { useAudioPlayer } from "@/hooks/use-audio-player";
-import { TrackModal } from "@/components/tracks/track-modal";
+import { AudioPlayer } from "@/components/tracks/audio-player";
 import { DeleteTrackDialog } from "@/components/tracks/delete-track-dialog";
+import { TrackFilters } from "@/components/tracks/track-filters";
+import { TrackList } from "@/components/tracks/track-list";
+import { TrackModal } from "@/components/tracks/track-modal";
 import { UploadTrackModal } from "@/components/tracks/upload-track-modal";
+import { Button } from "@/components/ui/button";
+import { useAudioPlayer } from "@/hooks/use-audio-player";
+import { useTracks } from "@/hooks/use-tracks";
 import { Track } from "@/types";
 export default function TracksPage() {
   const {

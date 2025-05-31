@@ -1,14 +1,15 @@
+import { AlertCircle,HomeIcon } from "lucide-react";
 import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
 } from "@/components/ui/card";
-import { HomeIcon, AlertCircle } from "lucide-react";
 
 export default function NotFound() {
   return (

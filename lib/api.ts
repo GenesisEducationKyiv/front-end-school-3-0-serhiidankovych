@@ -1,155 +1,166 @@
-import { Track, TrackFilters, TrackFormData, PaginatedResponse } from "@/types";
+import axios, { AxiosError, AxiosResponse } from "axios";
+import { ResultAsync } from "neverthrow";
+import { z } from "zod";
 
-const API_BASE_URL = "http://localhost:8000/api";
+import { ServerErrorPayload, TrackFilters } from "@/types";
+
+import {
+  PaginatedTrackResponseSchema,
+  ResponseSchema,
+  TrackFormData,
+  TrackFormSchema,
+  TrackSchema,
+} from "./schemas";
+
 const SERVER_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = `${SERVER_BASE_URL}/api`;
 const STATIC_FILES_PREFIX = "/api/files/";
 
-class ApiError extends Error {
-  constructor(
-    public message: string,
-    public status?: number,
-    public data?: unknown
-  ) {
-    super(message);
-    this.name = "ApiError";
-  }
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: { "Content-Type": "application/json" },
+});
+
+export interface ApiError {
+  status: number;
+  data: ServerErrorPayload;
 }
 
-async function handleResponse<T>(response: Response): Promise<T> {
-  const contentType = response.headers.get("content-type");
-  const isJson = contentType?.includes("application/json");
+const handleApiError = (error: AxiosError | Error): ApiError => {
+  console.log(error);
+  if (axios.isAxiosError(error)) {
+    const axiosError = error as AxiosError<ServerErrorPayload>;
+    const status = axiosError.response?.status ?? 500;
+    const data = axiosError.response?.data ?? { error: "Unknown error" };
 
-  if (!response.ok) {
-    const errorData = isJson ? await response.json() : null;
-    throw new ApiError(
-      errorData?.message || response.statusText,
-      response.status,
-      errorData
-    );
+    return { status, data };
   }
 
-  if (response.status === 204) {
-    return undefined as unknown as T;
-  }
+  return {
+    status: 500,
+    data: { error: error.message || "Unknown error" },
+  };
+};
 
-  return isJson ? response.json() : (response.text() as unknown as T);
-}
+const makeRequest = <T>(
+  requestFn: () => Promise<AxiosResponse>,
+  schema: z.ZodSchema<T>
+): ResultAsync<T, ApiError> => {
+  return ResultAsync.fromPromise(
+    requestFn().then((res) => schema.parse(res.data)),
+    (error) => handleApiError(error as AxiosError | Error)
+  );
+};
 
-function buildQueryParams(filters: TrackFilters): string {
+const buildQueryParams = (filters: TrackFilters): string => {
   const params = new URLSearchParams();
 
   Object.entries(filters).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== "") {
+    if (value != null && value !== "") {
       params.append(key, String(value));
     }
   });
 
   return params.toString();
-}
+};
+
+const validateFormData = (
+  data: TrackFormData
+): ResultAsync<TrackFormData, ApiError> => {
+  const validation = TrackFormSchema.safeParse(data);
+
+  if (!validation.success) {
+    const error: ApiError = {
+      status: 400,
+      data: { error: "Invalid form data" },
+    };
+    return ResultAsync.fromPromise(
+      Promise.reject(error),
+      (error) => error as ApiError
+    );
+  }
+
+  return ResultAsync.fromPromise(Promise.resolve(validation.data), (error) =>
+    handleApiError(error as AxiosError | Error)
+  );
+};
 
 export const api = {
-  async getTracks(filters: TrackFilters): Promise<PaginatedResponse<Track>> {
+  getTracks(filters: TrackFilters) {
     const query = buildQueryParams(filters);
-    const response = await fetch(`${API_BASE_URL}/tracks?${query}`);
-    return handleResponse<PaginatedResponse<Track>>(response);
+    return makeRequest(
+      () => apiClient.get(`/tracks?${query}`),
+      PaginatedTrackResponseSchema
+    );
   },
 
-  async getTrack(slugOrId: string): Promise<Track> {
-    const response = await fetch(`${API_BASE_URL}/tracks/${slugOrId}`);
-    return handleResponse<Track>(response);
+  getTrack(slugOrId: string) {
+    return makeRequest(() => apiClient.get(`/tracks/${slugOrId}`), TrackSchema);
   },
 
-  async createTrack(data: TrackFormData): Promise<Track> {
-    const response = await fetch(`${API_BASE_URL}/tracks`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+  createTrack(data: TrackFormData) {
+    return validateFormData(data).andThen(() =>
+      makeRequest(() => apiClient.post("/tracks", data), TrackSchema)
+    );
+  },
+
+  updateTrack(id: string, data: Partial<TrackFormData>) {
+    return makeRequest(() => apiClient.put(`/tracks/${id}`, data), TrackSchema);
+  },
+
+  deleteTrack(id: string) {
+    return makeRequest(() => apiClient.delete(`/tracks/${id}`), ResponseSchema);
+  },
+
+  multipleDeleteTracks(ids: string[]) {
+    return makeRequest(
+      () => apiClient.post("/tracks/delete", { ids }),
+      ResponseSchema
+    );
+  },
+
+  uploadTrackAudio(id: string, file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return makeRequest(
+      () =>
+        apiClient.post(`/tracks/${id}/upload`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        }),
+      TrackSchema
+    );
+  },
+
+  removeTrackAudio(id: string) {
+    return makeRequest(
+      () => apiClient.delete(`/tracks/${id}/file`),
+      TrackSchema
+    );
+  },
+
+  getArtists() {
+    return this.getTracks({ limit: 999, page: 1 }).map((response) => {
+      const artists = new Set<string>();
+
+      response.data.forEach((track) => {
+        if (track.artist) {
+          artists.add(track.artist);
+        }
+      });
+
+      return Array.from(artists).sort();
     });
-    return handleResponse<Track>(response);
   },
 
-  async updateTrack(id: string, data: Partial<TrackFormData>): Promise<Track> {
-    const response = await fetch(`${API_BASE_URL}/tracks/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    return handleResponse<Track>(response);
-  },
-
-  async deleteTrack(id: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/tracks/${id}`, {
-      method: "DELETE",
-    });
-    await handleResponse<void>(response);
-  },
-
-  async multipleDeleteTracks(
-    ids: string[]
-  ): Promise<{ success: string[]; failed: string[] }> {
-    const response = await fetch(`${API_BASE_URL}/tracks/delete`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids }),
-    });
-    return handleResponse<{ success: string[]; failed: string[] }>(response);
+  getGenres() {
+    return makeRequest(() => apiClient.get("/genres"), z.array(z.string()));
   },
 
   getTrackAudioUrl(audioFileName: string | null): string | null {
     if (!audioFileName) return null;
-    const encodedFileName = encodeURIComponent(audioFileName);
-    return `${SERVER_BASE_URL}${STATIC_FILES_PREFIX}${encodedFileName}`;
-  },
-
-  async uploadTrackAudio(id: string, file: File): Promise<Response> {
-    const formData = new FormData();
-    formData.append("file", file);
-    const response = await fetch(`${API_BASE_URL}/tracks/${id}/upload`, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Upload error details:", {
-        status: response.status,
-        statusText: response.statusText,
-        body: errorText,
-      });
-      throw new Error(
-        `Upload failed: ${response.status} ${response.statusText}`
-      );
-    }
-
-    return response;
-  },
-
-  async removeTrackAudio(id: string): Promise<Track> {
-    const response = await fetch(`${API_BASE_URL}/tracks/${id}/file`, {
-      method: "DELETE",
-    });
-    return handleResponse<Track>(response);
-  },
-
-  async getArtists(): Promise<string[]> {
-    try {
-      const response = await this.getTracks({
-        limit: 999,
-        page: 1,
-      });
-      const artists = new Set<string>();
-      response.data.forEach(
-        (track) => track.artist && artists.add(track.artist)
-      );
-      return Array.from(artists).sort();
-    } catch (error) {
-      console.error("Failed to get artists:", error);
-      return [];
-    }
-  },
-
-  async getGenres(): Promise<string[]> {
-    const response = await fetch(`${API_BASE_URL}/genres`);
-    return handleResponse<string[]>(response);
+    return `${SERVER_BASE_URL}${STATIC_FILES_PREFIX}${encodeURIComponent(
+      audioFileName
+    )}`;
   },
 };
