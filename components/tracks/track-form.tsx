@@ -423,7 +423,6 @@ export function TrackForm({
           </div>
         </div>
 
-        {/* Selected Genres Section */}
         {selectedGenres.length > 0 && (
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground">
@@ -453,7 +452,6 @@ export function TrackForm({
           </div>
         )}
 
-        {/* Available Genres Section */}
         <div>
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm font-medium text-muted-foreground">

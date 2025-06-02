@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
-import { ComponentTrackFilters } from "@/types";
+import type { ComponentTrackFilters } from "@/types";
 
 interface TrackFiltersProps {
   filters: ComponentTrackFilters;

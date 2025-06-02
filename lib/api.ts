@@ -2,12 +2,12 @@ import axios, { AxiosError, AxiosResponse } from "axios";
 import { ResultAsync } from "neverthrow";
 import { z } from "zod";
 
-import { TrackFilters } from "@/types";
+import type { TrackFilters } from "@/types";
 
 import {
   PaginatedTrackResponseSchema,
   ResponseSchema,
-  TrackFormData,
+  type TrackFormData,
   TrackFormSchema,
   TrackSchema,
 } from "./schemas";
@@ -156,11 +156,6 @@ export const api = {
 
   getTrackAudioUrl(audioFileName: string | null): string | null {
     if (!audioFileName) return null;
-    console.log(
-      `${SERVER_BASE_URL}${STATIC_FILES_PREFIX}${encodeURIComponent(
-        audioFileName
-      )}`
-    );
     return `${SERVER_BASE_URL}${STATIC_FILES_PREFIX}${encodeURIComponent(
       audioFileName
     )}`;
