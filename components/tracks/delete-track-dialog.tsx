@@ -54,6 +54,7 @@ export function DeleteTrackDialog({
             success: string[];
             failed: string[];
           };
+
           if (multipleDeleteData.failed?.length > 0) {
             toast.warning(
               `${multipleDeleteData.success.length} tracks deleted, ${multipleDeleteData.failed.length} failed.`,
@@ -64,9 +65,7 @@ export function DeleteTrackDialog({
               }
             );
           } else {
-            toast.success(`${trackIdsToDelete.length} Tracks deleted`, {
-              description: `The selected tracks have been deleted successfully.`,
-            });
+            toast.success(`${trackIdsToDelete.length} Tracks deleted`);
           }
         } else {
           const singleTrackTitle = tracksToDelete[0]?.title || "this track";
@@ -77,8 +76,9 @@ export function DeleteTrackDialog({
 
         parentOnSuccess();
       } else {
+        const apiError = result.error;
         toast.error("Delete failed", {
-          description: "An unknown error occurred",
+          description: apiError.error || "An unexpected error occurred",
         });
       }
     } finally {

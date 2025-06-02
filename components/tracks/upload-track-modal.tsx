@@ -1,6 +1,5 @@
-
-import { FileAudio, Loader2,Trash, Upload, X } from "lucide-react";
-import { useEffect,useRef, useState } from "react";
+import { FileAudio, Loader2, Trash, Upload, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -90,56 +89,54 @@ export function UploadTrackModal({
   };
 
   const handleUpload = async () => {
-  if (!selectedFile || !track?.id) return;
+    if (!selectedFile || !track?.id) return;
 
-  setIsUploading(true);
-  setUploadProgress(50);
+    setIsUploading(true);
+    setUploadProgress(50);
 
-  const result = await api.uploadTrackAudio(track.id, selectedFile);
+    const result = await api.uploadTrackAudio(track.id, selectedFile);
 
-  if (result.isOk()) {
-    
-    setUploadProgress(100);
-    toast.success("Upload successful", {
-      description: `Audio file "${selectedFile.name}" has been uploaded.`,
-    });
-    setTimeout(() => {
+    if (result.isOk()) {
+      setUploadProgress(100);
+      toast.success("Upload successful", {
+        description: `Audio file "${selectedFile.name}" has been uploaded.`,
+      });
+      setTimeout(() => {
+        resetState();
+        onSuccess();
+      }, 800);
+    } else {
+      const apiError = result.error;
+      setUploadProgress(0);
+      setIsUploading(false);
+
+      toast.error("Upload failed", {
+        description: apiError.error || "An unexpected error occurred",
+      });
+    }
+  };
+
+  const handleRemoveFile = async () => {
+    if (!track?.id) return;
+
+    setIsRemoving(true);
+    const result = await api.removeTrackAudio(track.id);
+
+    if (result.isOk()) {
+      toast.success("File removed", {
+        description: "The audio file has been removed from this track.",
+      });
+      setAudioUrl(null);
       resetState();
       onSuccess();
-    }, 800);
-  } else {
-    
-    setUploadProgress(0);
-    setIsUploading(false);
-    
-    toast.error("Upload failed", {
-      description: "An unexpected error occurred during upload.",
-    });
-  }
-};
-
-const handleRemoveFile = async () => {
-  if (!track?.id) return;
-
-  setIsRemoving(true);
-  const result = await api.removeTrackAudio(track.id);
-
-  if (result.isOk()) {
-    
-    toast.success("File removed", {
-      description: "The audio file has been removed from this track.",
-    });
-    setAudioUrl(null);
-    resetState();
-    onSuccess();
-  } else {
-    
-    setIsRemoving(false);
-    toast.error("Failed to remove file", {
-      description:  "An unknown error occurred while removing the file.",
-    });
-  }
-};
+    } else {
+      const apiError = result.error;
+      setIsRemoving(false);
+      toast.error("Failed to remove file", {
+        description: apiError.message,
+      });
+    }
+  };
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
@@ -210,7 +207,7 @@ const handleRemoveFile = async () => {
             </div>
           )}
 
-          {!selectedFile && !audioUrl && ( 
+          {!selectedFile && !audioUrl && (
             <div
               className={`border-2 border-dashed rounded-lg p-8 text-center ${
                 isUploading || isRemoving
@@ -223,9 +220,7 @@ const handleRemoveFile = async () => {
             >
               <div className="flex flex-col items-center gap-2">
                 <Upload className="h-10 w-10 text-muted-foreground mb-2" />
-                <h3 className="font-medium text-lg">
-                  Upload an audio file
-                </h3>
+                <h3 className="font-medium text-lg">Upload an audio file</h3>
                 <p className="text-sm text-muted-foreground">
                   Click to browse or drag and drop
                 </p>
@@ -248,7 +243,6 @@ const handleRemoveFile = async () => {
               </div>
             </div>
           )}
-
 
           {selectedFile && (
             <div className="border rounded-md p-4">
@@ -301,15 +295,12 @@ const handleRemoveFile = async () => {
           </Button>
 
           {selectedFile && (
-            <Button
-              onClick={handleUpload}
-              disabled={isUploading}
-            >
+            <Button onClick={handleUpload} disabled={isUploading}>
               {isUploading ? (
-                 <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Uploading...
-                  </>
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Uploading...
+                </>
               ) : audioUrl ? (
                 "Replace File"
               ) : (
@@ -317,7 +308,7 @@ const handleRemoveFile = async () => {
               )}
             </Button>
           )}
-           {!selectedFile && audioUrl && ( 
+          {!selectedFile && audioUrl && (
             <Button
               variant="default"
               onClick={handleBrowseClick}

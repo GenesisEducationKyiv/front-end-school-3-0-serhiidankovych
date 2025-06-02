@@ -1,15 +1,15 @@
 "use client";
 
 import { useWavesurfer } from "@wavesurfer/react";
-import { Music,Pause, Play, Volume2, VolumeX, X } from "lucide-react";
+import { Music, Pause, Play, Volume2, VolumeX, X } from "lucide-react";
 import Image from "next/image";
-import { useCallback,useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { api } from "@/lib/api";
-import { Track } from "@/types";
+import { Track } from "@/lib/schemas";
 
 interface AudioPlayerProps {
   track: Track;
@@ -33,7 +33,10 @@ export function AudioPlayer({
   const [isPlayPending, setIsPlayPending] = useState(false);
 
   const waveformRef = useRef<HTMLDivElement>(null);
-  const audioSrc = api.getTrackAudioUrl(track.audioFile);
+
+  const result = useMemo(() => {
+    return api.getTrackAudioUrl(track.audioFile ?? null);
+  }, [track.audioFile]);
 
   const { wavesurfer } = useWavesurfer({
     container: waveformRef,
@@ -45,7 +48,7 @@ export function AudioPlayer({
     barWidth: 2,
     barGap: 1,
     barRadius: 2,
-    url: audioSrc ?? undefined,
+    url: result ?? undefined,
   });
 
   useEffect(() => {
@@ -84,7 +87,7 @@ export function AudioPlayer({
           .catch((error) => {
             if (error.name !== "AbortError") {
               toast.error("Playback error", {
-                description: "Failed to play audio track",
+                description: "Failed to play audio track (promise rejection)",
               });
             }
             setIsPlayPending(false);
@@ -102,25 +105,16 @@ export function AudioPlayer({
   }, [wavesurfer, volume, isMuted]);
 
   const handlePlayPause = useCallback(() => {
-    if (!wavesurfer || !audioSrc || hasError || !isReady || isPlayPending)
-      return;
+    if (!wavesurfer || !result || hasError || !isReady || isPlayPending) return;
     handlePlay(track);
-  }, [
-    wavesurfer,
-    audioSrc,
-    hasError,
-    isReady,
-    isPlayPending,
-    handlePlay,
-    track,
-  ]);
+  }, [wavesurfer, result, hasError, isReady, isPlayPending, handlePlay, track]);
 
   const toggleMute = () => setIsMuted((prev) => !prev);
 
   const formatTime = (s: number) =>
     `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
-  const canPlay = !!audioSrc && !hasError;
+  const canPlay = !!result && !hasError;
 
   return (
     <div

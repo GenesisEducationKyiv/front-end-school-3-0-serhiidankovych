@@ -2,7 +2,7 @@
 
 import { Search } from "lucide-react";
 import { ResultAsync } from "neverthrow";
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import {

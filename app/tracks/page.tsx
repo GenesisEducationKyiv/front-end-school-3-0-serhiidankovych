@@ -1,6 +1,6 @@
 "use client";
-import { AlertCircle, CopyX,Loader2, Plus, Trash2 } from "lucide-react";
-import { useMemo,useState } from "react";
+import { AlertCircle, CopyX, Loader2, Plus, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
 
 import { Pagination } from "@/components/pagination";
 import { AudioPlayer } from "@/components/tracks/audio-player";
@@ -12,7 +12,8 @@ import { UploadTrackModal } from "@/components/tracks/upload-track-modal";
 import { Button } from "@/components/ui/button";
 import { useAudioPlayer } from "@/hooks/use-audio-player";
 import { useTracks } from "@/hooks/use-tracks";
-import { Track } from "@/types";
+import { Track } from "@/lib/schemas";
+
 export default function TracksPage() {
   const {
     tracks,

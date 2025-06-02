@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { ResultAsync } from "neverthrow";
+import { useCallback, useEffect, useState } from "react";
+
 import { useDebounce } from "@/hooks/use-debounce";
 import { api, ApiError } from "@/lib/api";
-import { ComponentTrackFilters } from "@/types";
-
-import { ResultAsync } from "neverthrow";
 import { Track } from "@/lib/schemas";
+import { ComponentTrackFilters } from "@/types";
 
 export const ITEMS_PER_PAGE = 10;
 
@@ -67,6 +67,9 @@ export function useTracks() {
         setTotalTracks(0);
       }
     } else {
+      const apiError = result.error;
+      console.error("Fetch tracks error:", apiError);
+      setError(apiError.error || "Failed to fetch tracks");
       setTracks([]);
       setTotalTracks(0);
     }
@@ -78,6 +81,10 @@ export function useTracks() {
   useEffect(() => {
     fetchTracks();
   }, [fetchTracks]);
+
+  useEffect(() => {
+    setError(null);
+  }, [filters]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -93,10 +100,9 @@ export function useTracks() {
     if (result.isOk()) {
       onSuccess?.(result.value);
     } else {
-      const err = result.error;
-      const message = err.data?.error ?? `Unexpected error (${err.status})`;
-      setError(message);
-      onError?.(err);
+      const apiError = result.error;
+      setError(apiError.error || "An unexpected error occurred");
+      onError?.(apiError);
     }
   };
 

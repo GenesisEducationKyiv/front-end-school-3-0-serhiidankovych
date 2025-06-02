@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosResponse } from "axios";
 import { ResultAsync } from "neverthrow";
 import { z } from "zod";
 
-import { ServerErrorPayload, TrackFilters } from "@/types";
+import { TrackFilters } from "@/types";
 
 import {
   PaginatedTrackResponseSchema,
@@ -22,23 +22,21 @@ const apiClient = axios.create({
 });
 
 export interface ApiError {
-  status: number;
-  data: ServerErrorPayload;
+  error: string;
+  message: string;
 }
 
-const handleApiError = (error: AxiosError | Error): ApiError => {
-  console.log(error);
-  if (axios.isAxiosError(error)) {
-    const axiosError = error as AxiosError<ServerErrorPayload>;
-    const status = axiosError.response?.status ?? 500;
-    const data = axiosError.response?.data ?? { error: "Unknown error" };
+interface ErrorResponse {
+  error?: string;
+  message?: string;
+}
 
-    return { status, data };
-  }
+const handleApiError = (error: AxiosError): ApiError => {
+  const responseData = error.response?.data as ErrorResponse;
 
   return {
-    status: 500,
-    data: { error: error.message || "Unknown error" },
+    error: responseData?.error || "Unknown error",
+    message: responseData?.message || error.message || "Something went wrong",
   };
 };
 
@@ -48,7 +46,7 @@ const makeRequest = <T>(
 ): ResultAsync<T, ApiError> => {
   return ResultAsync.fromPromise(
     requestFn().then((res) => schema.parse(res.data)),
-    (error) => handleApiError(error as AxiosError | Error)
+    (error) => handleApiError(error as AxiosError)
   );
 };
 
@@ -70,18 +68,14 @@ const validateFormData = (
   const validation = TrackFormSchema.safeParse(data);
 
   if (!validation.success) {
-    const error: ApiError = {
-      status: 400,
-      data: { error: "Invalid form data" },
-    };
     return ResultAsync.fromPromise(
-      Promise.reject(error),
+      Promise.reject({ error: validation.error }),
       (error) => error as ApiError
     );
   }
 
   return ResultAsync.fromPromise(Promise.resolve(validation.data), (error) =>
-    handleApiError(error as AxiosError | Error)
+    handleApiError(error as AxiosError)
   );
 };
 
@@ -96,6 +90,9 @@ export const api = {
 
   getTrack(slugOrId: string) {
     return makeRequest(() => apiClient.get(`/tracks/${slugOrId}`), TrackSchema);
+  },
+  getTestTrack() {
+    return makeRequest(() => apiClient.get(`/tracks/notexist`), TrackSchema);
   },
 
   createTrack(data: TrackFormData) {
@@ -159,6 +156,11 @@ export const api = {
 
   getTrackAudioUrl(audioFileName: string | null): string | null {
     if (!audioFileName) return null;
+    console.log(
+      `${SERVER_BASE_URL}${STATIC_FILES_PREFIX}${encodeURIComponent(
+        audioFileName
+      )}`
+    );
     return `${SERVER_BASE_URL}${STATIC_FILES_PREFIX}${encodeURIComponent(
       audioFileName
     )}`;

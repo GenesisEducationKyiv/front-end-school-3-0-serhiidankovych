@@ -81,9 +81,8 @@ export function TrackModal({
       parentOnSuccess(processedTrack);
       if (!isEditMode) onClose();
     } else {
-      const err = result.error;
-      const message = err.data?.error ?? `Unexpected error (${err.status})`;
-      setError(message);
+      const apiError = result.error;
+      setError(apiError.error || "An unexpected error occurred");
     }
 
     setIsSubmitting(false);

@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle,CheckCircle, FileImage, Loader2, X } from "lucide-react";
+import { AlertCircle, CheckCircle, FileImage, Loader2, X } from "lucide-react";
 import Image from "next/image";
-import { useCallback,useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { Badge } from "@/components/ui/badge";
@@ -173,11 +173,13 @@ export function TrackForm({
       setIsLoadingGenres(true);
       setGenreLoadError(null);
 
-      const genresResult = await api.getGenres();
+      const result = await api.getGenres();
 
-      if (genresResult.isOk()) {
-        setAvailableGenres(genresResult.value);
+      if (result.isOk()) {
+        setAvailableGenres(result.value);
       } else {
+        const apiError = result.error;
+        setGenreLoadError(apiError.error || "An unexpected error occurred");
       }
 
       setIsLoadingGenres(false);
