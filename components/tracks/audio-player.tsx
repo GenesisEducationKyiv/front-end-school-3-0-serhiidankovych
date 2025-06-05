@@ -104,6 +104,14 @@ export function AudioPlayer({
     if (wavesurfer) wavesurfer.setVolume(isMuted ? 0 : volume);
   }, [wavesurfer, volume, isMuted]);
 
+  useEffect(() => {
+    setHasError(false);
+    setIsReady(false);
+    setCurrentTime(0);
+    setDuration(0);
+    setIsPlayPending(false);
+  }, [track.id]);
+
   const handlePlayPause = useCallback(() => {
     if (!wavesurfer || !result || hasError || !isReady || isPlayPending) return;
     handlePlay(track);
