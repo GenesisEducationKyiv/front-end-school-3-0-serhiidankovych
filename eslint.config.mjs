@@ -23,7 +23,7 @@ const compat = new FlatCompat({
 export default [
   globalIgnores(["node_modules/", ".next/", "dist/", "build/"]),
 
-  ...compat.extends("next/core-web-vitals"),
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
 
   {
     files: ["**/*.{js,ts,jsx,tsx}"],

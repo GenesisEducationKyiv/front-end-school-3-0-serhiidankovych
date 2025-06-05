@@ -28,30 +28,17 @@ export function TrackFilters({ filters, updateFilters }: TrackFiltersProps) {
   useEffect(() => {
     const fetchFilterOptions = async () => {
       setIsLoading(true);
-
       const genresResult = api.getGenres();
       const artistsResult = api.getArtists();
-
       const [genresData, artistsData] = await ResultAsync.combine([
         genresResult,
         artistsResult,
       ]).unwrapOr([[], []]);
 
-      if (Array.isArray(genresData)) {
-        setGenres(genresData);
-      } else {
-        setGenres([]);
-      }
-
-      if (Array.isArray(artistsData)) {
-        setArtists(artistsData);
-      } else {
-        setArtists([]);
-      }
-
+      setGenres(genresData);
+      setArtists(artistsData);
       setIsLoading(false);
     };
-
     fetchFilterOptions();
   }, []);
 

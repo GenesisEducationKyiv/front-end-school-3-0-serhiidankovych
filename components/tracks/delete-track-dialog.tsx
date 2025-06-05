@@ -29,7 +29,6 @@ export function DeleteTrackDialog({
   onSuccess: parentOnSuccess,
 }: DeleteTrackDialogProps) {
   const [isDeleting, setIsDeleting] = useState(false);
-
   const isMultiple = tracksToDelete.length > 1;
   const trackIdsToDelete = tracksToDelete.map((t) => t.id);
 
@@ -41,39 +40,38 @@ export function DeleteTrackDialog({
 
     setIsDeleting(true);
 
-    try {
-      const result = isMultiple
-        ? await api.multipleDeleteTracks(trackIdsToDelete)
-        : await api.deleteTrack(trackIdsToDelete[0]);
+    if (isMultiple) {
+      const result = await api.multipleDeleteTracks(trackIdsToDelete);
 
       if (result.isOk()) {
-        const data = result.value;
+        const data = result.value as { success: string[]; failed: string[] };
 
-        if (isMultiple) {
-          const multipleDeleteData = data as {
-            success: string[];
-            failed: string[];
-          };
-
-          if (multipleDeleteData.failed?.length > 0) {
-            toast.warning(
-              `${multipleDeleteData.success.length} tracks deleted, ${multipleDeleteData.failed.length} failed.`,
-              {
-                description: `Failed IDs: ${multipleDeleteData.failed.join(
-                  ", "
-                )}`,
-              }
-            );
-          } else {
-            toast.success(`${trackIdsToDelete.length} Tracks deleted`);
-          }
+        if (data.failed?.length > 0) {
+          toast.warning(
+            `${data.success.length} tracks deleted, ${data.failed.length} failed.`,
+            {
+              description: `Failed IDs: ${data.failed.join(", ")}`,
+            }
+          );
         } else {
-          const singleTrackTitle = tracksToDelete[0]?.title || "this track";
-          toast.success("Track deleted", {
-            description: `"${singleTrackTitle}" has been deleted successfully.`,
-          });
+          toast.success(`${trackIdsToDelete.length} Tracks deleted`);
         }
+        parentOnSuccess();
+      } else {
+        const apiError = result.error;
 
+        toast.error("Delete failed", {
+          description: apiError.error || "An unexpected error occurred",
+        });
+      }
+    } else {
+      const result = await api.deleteTrack(trackIdsToDelete[0]);
+
+      if (result.isOk()) {
+        const singleTrackTitle = tracksToDelete[0]?.title || "this track";
+        toast.success("Track deleted", {
+          description: `"${singleTrackTitle}" has been deleted successfully.`,
+        });
         parentOnSuccess();
       } else {
         const apiError = result.error;
@@ -81,10 +79,10 @@ export function DeleteTrackDialog({
           description: apiError.error || "An unexpected error occurred",
         });
       }
-    } finally {
-      setIsDeleting(false);
-      onClose();
     }
+
+    setIsDeleting(false);
+    onClose();
   };
 
   const handleOpenChange = (open: boolean) => {
@@ -96,6 +94,7 @@ export function DeleteTrackDialog({
   const dialogTitle = isMultiple
     ? `Delete ${tracksToDelete.length} Tracks?`
     : `Delete Track?`;
+
   const dialogDescription = isMultiple
     ? `Are you sure you want to delete these ${tracksToDelete.length} tracks? This action cannot be undone.`
     : `Are you sure you want to delete "${

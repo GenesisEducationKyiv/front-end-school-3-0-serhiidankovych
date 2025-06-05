@@ -68,7 +68,6 @@ export function useTracks() {
       }
     } else {
       const apiError = result.error;
-      console.error("Fetch tracks error:", apiError);
       setError(apiError.error || "Failed to fetch tracks");
       setTracks([]);
       setTotalTracks(0);

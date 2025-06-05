@@ -31,14 +31,19 @@ export const PaginatedTrackResponseSchema = z.object({
   }),
 });
 
-export const ResponseSchema = z.object({
+export const MultipleDeleteResponseSchema = z.object({
   success: z.array(z.string()),
   failed: z.array(z.string()),
 });
+
+export const SingleDeleteResponseSchema = z.string();
 
 export type Track = z.infer<typeof TrackSchema>;
 export type TrackFormData = z.infer<typeof TrackFormSchema>;
 export type PaginatedTrackResponse = z.infer<
   typeof PaginatedTrackResponseSchema
 >;
-export type ApiResponse = z.infer<typeof ResponseSchema>;
+export type MultipleDeleteResponse = z.infer<
+  typeof MultipleDeleteResponseSchema
+>;
+export type SingleDeleteResponse = z.infer<typeof SingleDeleteResponseSchema>;

@@ -5,8 +5,9 @@ import { z } from "zod";
 import type { TrackFilters } from "@/types";
 
 import {
+  MultipleDeleteResponseSchema,
   PaginatedTrackResponseSchema,
-  ResponseSchema,
+  SingleDeleteResponseSchema,
   type TrackFormData,
   TrackFormSchema,
   TrackSchema,
@@ -106,13 +107,16 @@ export const api = {
   },
 
   deleteTrack(id: string) {
-    return makeRequest(() => apiClient.delete(`/tracks/${id}`), ResponseSchema);
+    return makeRequest(
+      () => apiClient.delete(`/tracks/${id}`),
+      SingleDeleteResponseSchema
+    );
   },
 
   multipleDeleteTracks(ids: string[]) {
     return makeRequest(
       () => apiClient.post("/tracks/delete", { ids }),
-      ResponseSchema
+      MultipleDeleteResponseSchema
     );
   },
 

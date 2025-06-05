@@ -50,7 +50,7 @@ export function TrackForm({
   );
   const [availableGenres, setAvailableGenres] = useState<string[]>([]);
   const [isLoadingGenres, setIsLoadingGenres] = useState(false);
-
+  const [genreLoadError, setGenreLoadError] = useState<string | null>(null);
   const [imagePreviewError, setImagePreviewError] = useState(false);
   const [isVerifyingImage, setIsVerifyingImage] = useState(false);
   const [isImageVerified, setIsImageVerified] = useState(false);
@@ -58,10 +58,22 @@ export function TrackForm({
 
   const coverImageUrl = form.watch("coverImage");
 
+  const fetchGenres = useCallback(async () => {
+    setIsLoadingGenres(true);
+    setGenreLoadError(null);
+    const result = await api.getGenres();
+    if (result.isOk()) {
+      setAvailableGenres(result.value);
+    } else {
+      const apiError = result.error;
+      setGenreLoadError(apiError.error || "An unexpected error occurred");
+    }
+    setIsLoadingGenres(false);
+  }, []);
+
   useEffect(() => {
     const hasInitialImage =
       !!initialData?.coverImage && initialData.coverImage === coverImageUrl;
-
     if (hasInitialImage) {
       setShowPreview(true);
       setIsImageVerified(true);
@@ -81,7 +93,6 @@ export function TrackForm({
 
   const verifyImageUrl = useCallback(async (url: string): Promise<boolean> => {
     if (!url) return false;
-
     return new Promise((resolve) => {
       const img = new window.Image();
       const timeoutId = setTimeout(() => {
@@ -90,12 +101,10 @@ export function TrackForm({
         img.src = "";
         resolve(false);
       }, 5000);
-
       img.onload = () => {
         clearTimeout(timeoutId);
         resolve(true);
       };
-
       img.onerror = () => {
         clearTimeout(timeoutId);
         resolve(false);
@@ -109,13 +118,10 @@ export function TrackForm({
   const handleVerifyImage = useCallback(async () => {
     const url = form.getValues("coverImage");
     if (!url || isVerifyingImage) return;
-
     setIsVerifyingImage(true);
     setIsImageVerified(false);
     setImagePreviewError(false);
-
     const isValid = await verifyImageUrl(url);
-
     if (isValid) {
       setIsImageVerified(true);
       setShowPreview(true);
@@ -141,14 +147,12 @@ export function TrackForm({
     ) {
       return;
     }
-
     const timer = setTimeout(() => {
       const imageUrlPattern = /\.(jpeg|jpg|gif|png|webp|svg|avif)(\?.*)?$/i;
       if (imageUrlPattern.test(coverImageUrl)) {
         handleVerifyImage();
       }
     }, 800);
-
     return () => clearTimeout(timer);
   }, [
     coverImageUrl,
@@ -166,27 +170,9 @@ export function TrackForm({
     form.clearErrors("coverImage");
   };
 
-  const [genreLoadError, setGenreLoadError] = useState<string | null>(null);
-
   useEffect(() => {
-    const fetchGenres = async () => {
-      setIsLoadingGenres(true);
-      setGenreLoadError(null);
-
-      const result = await api.getGenres();
-
-      if (result.isOk()) {
-        setAvailableGenres(result.value);
-      } else {
-        const apiError = result.error;
-        setGenreLoadError(apiError.error || "An unexpected error occurred");
-      }
-
-      setIsLoadingGenres(false);
-    };
-
     fetchGenres();
-  }, []);
+  }, [fetchGenres]);
 
   const filteredGenres = availableGenres.filter(
     (genre) => !selectedGenres.includes(genre)
@@ -282,7 +268,6 @@ export function TrackForm({
               )}
             />
           </div>
-
           <div className="space-y-2">
             <FormField
               control={form.control}
@@ -328,7 +313,6 @@ export function TrackForm({
                       )}
                     </Button>
                   </div>
-
                   <div className="h-5 mt-1">
                     {isVerifyingImage && (
                       <p className="text-xs text-muted-foreground flex items-center">
@@ -352,7 +336,6 @@ export function TrackForm({
                       </p>
                     )}
                   </div>
-
                   <FormDescription className="text-xs pt-1">
                     Enter a valid image URL (JPG, PNG, GIF, etc.) and click to
                     verify
@@ -360,7 +343,6 @@ export function TrackForm({
                   {!isVerifyingImage && !imagePreviewError && (
                     <FormMessage data-testid="error-cover-image" />
                   )}
-
                   <div className="mt-3 flex items-center justify-center bg-accent p-4 min-h-[120px] border-dashed border-2 border-border rounded-md">
                     {showPreview &&
                     coverImageUrl &&
@@ -386,7 +368,6 @@ export function TrackForm({
                             unoptimized
                           />
                         </div>
-
                         <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded">
                           <Button
                             type="button"
@@ -422,7 +403,6 @@ export function TrackForm({
             />
           </div>
         </div>
-
         {selectedGenres.length > 0 && (
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground">
@@ -451,7 +431,6 @@ export function TrackForm({
             </div>
           </div>
         )}
-
         <div>
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm font-medium text-muted-foreground">
@@ -462,26 +441,13 @@ export function TrackForm({
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => {
-                  setGenreLoadError(null);
-                  const fetchGenres = async () => {
-                    setIsLoadingGenres(true);
-                    const result = await api.getGenres();
-                    if (result.isOk()) {
-                      setAvailableGenres(result.value);
-                    } else {
-                    }
-                    setIsLoadingGenres(false);
-                  };
-                  fetchGenres();
-                }}
+                onClick={fetchGenres}
                 className="text-xs"
               >
                 Retry
               </Button>
             )}
           </div>
-
           {isLoadingGenres ? (
             <div className="flex items-center text-sm text-muted-foreground py-2">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
