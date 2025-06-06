@@ -1,11 +1,11 @@
+import "./globals.css";
+
 import type { Metadata } from "next";
 import { IBM_Plex_Sans } from "next/font/google";
 
-import "./globals.css";
-
-import { Toaster } from "@/components/ui/sonner";
-import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { Header } from "@/components/header";
+import { Toaster } from "@/components/ui/sonner";
 
 const iBMPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],

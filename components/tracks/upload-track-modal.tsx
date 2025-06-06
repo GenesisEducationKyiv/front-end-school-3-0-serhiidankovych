@@ -1,18 +1,19 @@
-import { useState, useRef, useEffect } from "react";
+import { FileAudio, Loader2, Trash, Upload, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { Track } from "@/types";
-import { api } from "@/lib/api";
-import { Upload, X, FileAudio, Trash } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { api } from "@/lib/api";
+import { Track } from "@/lib/schemas";
 
 interface UploadTrackModalProps {
   isOpen: boolean;
@@ -47,24 +48,9 @@ export function UploadTrackModal({
     setIsRemoving(false);
     setUploadProgress(0);
     setSelectedFile(null);
-
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
-  };
-
-  const simulateProgress = () => {
-    setUploadProgress(0);
-    const timer = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 95) {
-          clearInterval(timer);
-          return prev;
-        }
-        return prev + 5;
-      });
-    }, 150);
-    return timer;
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,7 +62,6 @@ export function UploadTrackModal({
         "audio/mp3",
         "audio/x-wav",
       ];
-
       if (!allowedMimeTypes.includes(file.type)) {
         toast.error("Invalid file type", {
           description: "Please upload an MP3 or WAV file only.",
@@ -86,7 +71,6 @@ export function UploadTrackModal({
         }
         return;
       }
-
       setSelectedFile(file);
       setUploadProgress(0);
     }
@@ -98,6 +82,7 @@ export function UploadTrackModal({
 
   const handleClearSelection = () => {
     setSelectedFile(null);
+    setUploadProgress(0);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -106,44 +91,28 @@ export function UploadTrackModal({
   const handleUpload = async () => {
     if (!selectedFile || !track?.id) return;
 
-    let progressTimer: NodeJS.Timeout | null = null;
     setIsUploading(true);
+    setUploadProgress(50);
 
-    try {
-      progressTimer = simulateProgress();
+    const result = await api.uploadTrackAudio(track.id, selectedFile);
 
-      const response = await api.uploadTrackAudio(track.id, selectedFile);
-      const updatedTrack = await response.json();
-
-      console.log("Updated track:", updatedTrack);
-
+    if (result.isOk()) {
       setUploadProgress(100);
-
-      if (progressTimer) clearInterval(progressTimer);
-
       toast.success("Upload successful", {
         description: `Audio file "${selectedFile.name}" has been uploaded.`,
       });
-
       setTimeout(() => {
         resetState();
         onSuccess();
       }, 800);
-    } catch (error) {
-      if (progressTimer) clearInterval(progressTimer);
+    } else {
+      const apiError = result.error;
       setUploadProgress(0);
-
-      console.error("Failed to upload audio file:", error);
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "An unknown error occurred during upload.";
+      setIsUploading(false);
 
       toast.error("Upload failed", {
-        description: errorMessage,
+        description: apiError.error || "An unexpected error occurred",
       });
-
-      setIsUploading(false);
     }
   };
 
@@ -151,28 +120,21 @@ export function UploadTrackModal({
     if (!track?.id) return;
 
     setIsRemoving(true);
+    const result = await api.removeTrackAudio(track.id);
 
-    try {
-      await api.removeTrackAudio(track.id);
-
+    if (result.isOk()) {
       toast.success("File removed", {
         description: "The audio file has been removed from this track.",
       });
-
       setAudioUrl(null);
       resetState();
       onSuccess();
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "An unknown error occurred while removing the file.";
-
-      toast.error("Failed to remove file", {
-        description: errorMessage,
-      });
-    } finally {
+    } else {
+      const apiError = result.error;
       setIsRemoving(false);
+      toast.error("Failed to remove file", {
+        description: apiError.message,
+      });
     }
   };
 
@@ -231,7 +193,10 @@ export function UploadTrackModal({
                 disabled={isRemoving || isUploading}
               >
                 {isRemoving ? (
-                  "Removing..."
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Removing...
+                  </>
                 ) : (
                   <>
                     <Trash className="h-4 w-4 mr-2" />
@@ -242,7 +207,7 @@ export function UploadTrackModal({
             </div>
           )}
 
-          {!selectedFile && (
+          {!selectedFile && !audioUrl && (
             <div
               className={`border-2 border-dashed rounded-lg p-8 text-center ${
                 isUploading || isRemoving
@@ -255,16 +220,12 @@ export function UploadTrackModal({
             >
               <div className="flex flex-col items-center gap-2">
                 <Upload className="h-10 w-10 text-muted-foreground mb-2" />
-                <h3 className="font-medium text-lg">
-                  {audioUrl
-                    ? "Upload a new audio file"
-                    : "Upload an audio file"}
-                </h3>
+                <h3 className="font-medium text-lg">Upload an audio file</h3>
                 <p className="text-sm text-muted-foreground">
                   Click to browse or drag and drop
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Supports MP3, WAV (max 10MB)
+                  Supports MP3, WAV
                 </p>
                 <Button
                   variant="outline"
@@ -305,17 +266,18 @@ export function UploadTrackModal({
                     size="icon"
                     onClick={handleClearSelection}
                     className="h-8 w-8"
+                    aria-label="Clear selected file"
                   >
                     <X className="h-4 w-4" />
                   </Button>
                 )}
               </div>
 
-              {uploadProgress > 0 && (
+              {isUploading && (
                 <div className="space-y-2">
                   <Progress value={uploadProgress} className="h-2" />
                   <p className="text-sm text-right text-muted-foreground">
-                    {uploadProgress}%
+                    {uploadProgress === 100 ? "Complete!" : "Uploading..."}
                   </p>
                 </div>
               )}
@@ -333,15 +295,27 @@ export function UploadTrackModal({
           </Button>
 
           {selectedFile && (
+            <Button onClick={handleUpload} disabled={isUploading}>
+              {isUploading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Uploading...
+                </>
+              ) : audioUrl ? (
+                "Replace File"
+              ) : (
+                "Upload File"
+              )}
+            </Button>
+          )}
+          {!selectedFile && audioUrl && (
             <Button
-              onClick={handleUpload}
-              disabled={isUploading || uploadProgress >= 95}
+              variant="default"
+              onClick={handleBrowseClick}
+              disabled={isUploading || isRemoving}
             >
-              {isUploading
-                ? "Uploading..."
-                : audioUrl
-                ? "Replace File"
-                : "Upload File"}
+              <Upload className="mr-2 h-4 w-4" />
+              Upload New File
             </Button>
           )}
         </DialogFooter>

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { Track } from "@/types";
+import { useCallback, useState } from "react";
+
+import { Track } from "@/lib/schemas";
 
 export function useAudioPlayer() {
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);

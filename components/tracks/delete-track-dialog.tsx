@@ -1,4 +1,7 @@
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,9 +12,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
-import { Track } from "@/types";
 import { api } from "@/lib/api";
+import { Track } from "@/lib/schemas";
 
 interface DeleteTrackDialogProps {
   isOpen: boolean;
@@ -24,10 +26,9 @@ export function DeleteTrackDialog({
   isOpen,
   onClose,
   tracksToDelete,
-  onSuccess,
+  onSuccess: parentOnSuccess,
 }: DeleteTrackDialogProps) {
   const [isDeleting, setIsDeleting] = useState(false);
-
   const isMultiple = tracksToDelete.length > 1;
   const trackIdsToDelete = tracksToDelete.map((t) => t.id);
 
@@ -38,44 +39,50 @@ export function DeleteTrackDialog({
     }
 
     setIsDeleting(true);
-    try {
-      if (isMultiple) {
-        const result = await api.multipleDeleteTracks(trackIdsToDelete);
 
-        if (result.failed && result.failed.length > 0) {
+    if (isMultiple) {
+      const result = await api.multipleDeleteTracks(trackIdsToDelete);
+
+      if (result.isOk()) {
+        const data = result.value as { success: string[]; failed: string[] };
+
+        if (data.failed?.length > 0) {
           toast.warning(
-            `${result.success.length} tracks deleted, ${result.failed.length} failed.`,
+            `${data.success.length} tracks deleted, ${data.failed.length} failed.`,
             {
-              description: `Failed IDs: ${result.failed.join(", ")}`,
+              description: `Failed IDs: ${data.failed.join(", ")}`,
             }
           );
         } else {
-          toast.success(`${trackIdsToDelete.length} Tracks deleted`, {
-            description: `The selected tracks have been deleted successfully.`,
-          });
+          toast.success(`${trackIdsToDelete.length} Tracks deleted`);
         }
+        parentOnSuccess();
       } else {
-        const singleTrackId = trackIdsToDelete[0];
-        const singleTrackTitle = tracksToDelete[0]?.title || "this track";
+        const apiError = result.error;
 
-        await api.deleteTrack(singleTrackId);
+        toast.error("Delete failed", {
+          description: apiError.error || "An unexpected error occurred",
+        });
+      }
+    } else {
+      const result = await api.deleteTrack(trackIdsToDelete[0]);
+
+      if (result.isOk()) {
+        const singleTrackTitle = tracksToDelete[0]?.title || "this track";
         toast.success("Track deleted", {
           description: `"${singleTrackTitle}" has been deleted successfully.`,
         });
+        parentOnSuccess();
+      } else {
+        const apiError = result.error;
+        toast.error("Delete failed", {
+          description: apiError.error || "An unexpected error occurred",
+        });
       }
-
-      onSuccess();
-    } catch (error) {
-      console.error(`Failed to delete track(s)`, error);
-      const errorMessage =
-        error instanceof Error ? error.message : "An unknown error occurred";
-
-      toast.error("Delete failed", {
-        description: errorMessage,
-      });
-    } finally {
-      setIsDeleting(false);
     }
+
+    setIsDeleting(false);
+    onClose();
   };
 
   const handleOpenChange = (open: boolean) => {
@@ -87,6 +94,7 @@ export function DeleteTrackDialog({
   const dialogTitle = isMultiple
     ? `Delete ${tracksToDelete.length} Tracks?`
     : `Delete Track?`;
+
   const dialogDescription = isMultiple
     ? `Are you sure you want to delete these ${tracksToDelete.length} tracks? This action cannot be undone.`
     : `Are you sure you want to delete "${
@@ -120,11 +128,16 @@ export function DeleteTrackDialog({
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90 focus:ring-destructive"
             data-testid="confirm-delete"
           >
-            {isDeleting
-              ? "Deleting..."
-              : isMultiple
-              ? `Delete ${tracksToDelete.length} Tracks`
-              : "Delete Track"}
+            {isDeleting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Deleting...
+              </>
+            ) : isMultiple ? (
+              `Delete ${tracksToDelete.length} Tracks`
+            ) : (
+              "Delete Track"
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

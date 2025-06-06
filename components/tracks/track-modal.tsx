@@ -1,21 +1,24 @@
+import { AlertCircle, Loader2, Pencil, PlusCircle } from "lucide-react";
+import { ResultAsync } from "neverthrow";
 import { useState } from "react";
-import { TrackForm } from "./track-form";
+import { toast } from "sonner";
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
-  DialogClose,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { Track, TrackFormData } from "@/types";
-import { api } from "@/lib/api";
-import { Loader2, AlertCircle, Pencil, PlusCircle } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { api, ApiError } from "@/lib/api";
+import { Track, TrackFormData } from "@/lib/schemas";
+
+import { TrackForm } from "./track-form";
 
 interface TrackModalProps {
   isOpen: boolean;
@@ -29,7 +32,7 @@ export function TrackModal({
   isOpen,
   onClose,
   track,
-  onSuccess,
+  onSuccess: parentOnSuccess,
   mode,
 }: TrackModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,51 +41,51 @@ export function TrackModal({
   const isEditMode = mode === "edit";
   const formId = isEditMode ? "edit-track-form" : "create-track-form";
 
+  const getTrackOperation = (
+    data: TrackFormData
+  ): ResultAsync<Track, ApiError> | null => {
+    if (isEditMode) {
+      if (!track) {
+        toast.error("Cannot update: Track data missing.");
+        return null;
+      }
+      return api
+        .updateTrack(track.id, data)
+        .map((updatedTrack) => ({ ...track, ...updatedTrack } as Track));
+    } else {
+      return api.createTrack(data);
+    }
+  };
+
   const handleSubmit = async (data: TrackFormData) => {
     setIsSubmitting(true);
     setError(null);
 
-    try {
-      if (isEditMode) {
-        if (!track) {
-          toast.error("Cannot update: Track data missing.");
-          return;
-        }
-        const updatedTrackData = { ...track, ...data };
-        await api.updateTrack(track.id, data);
-        toast.success("Track updated", {
-          description: `"${data.title}" saved successfully.`,
-          duration: 3000,
-        });
-        onSuccess(updatedTrackData as Track);
-      } else {
-        const newTrack = await api.createTrack(data);
-        toast.success("Track Created", {
-          description: `"${data.title}" was added successfully.`,
-          duration: 3000,
-        });
-        onSuccess(newTrack);
-      }
-    } catch (err) {
-      console.error(
-        isEditMode
-          ? `Failed to update track ID: ${track?.id}`
-          : "Failed to create track:",
-        err
-      );
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : `An unknown error occurred during ${
-              isEditMode ? "update" : "creation"
-            }.`;
-      setError(errorMessage);
-      toast.error(isEditMode ? "Update failed" : "Creation Failed", {
-        description: errorMessage,
-      });
-    } finally {
+    const operation = getTrackOperation(data);
+    if (!operation) {
       setIsSubmitting(false);
+      return;
     }
+
+    const result = await operation;
+
+    if (result.isOk()) {
+      const processedTrack = result.value;
+      const actionText = isEditMode ? "updated" : "created";
+
+      toast.success(`Track ${actionText}`, {
+        description: `"${processedTrack.title}" was ${actionText} successfully.`,
+        duration: 3000,
+      });
+
+      parentOnSuccess(processedTrack);
+      if (!isEditMode) onClose();
+    } else {
+      const apiError = result.error;
+      setError(apiError.error || "An unexpected error occurred");
+    }
+
+    setIsSubmitting(false);
   };
 
   const handleInteractOutside = (event: Event) => {
@@ -105,12 +108,12 @@ export function TrackModal({
     ? track
     : {
         title: "",
-        description: "",
-        audioUrl: "",
         artist: "",
         album: "",
         genres: [],
+        coverImage: "",
       };
+
   const icon = isEditMode ? (
     <Pencil className="h-5 w-5 text-muted-foreground" />
   ) : (
@@ -154,7 +157,7 @@ export function TrackModal({
         <ScrollArea className="h-[400px] p-4">
           <TrackForm
             id={formId}
-            initialData={initialData as Track}
+            initialData={initialData as Partial<TrackFormData>}
             onSubmit={handleSubmit}
             isSubmitting={isSubmitting}
           />
