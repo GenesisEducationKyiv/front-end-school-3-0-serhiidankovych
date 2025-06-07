@@ -1,48 +1,135 @@
-import { FlatCompat } from "@eslint/eslintrc";
-import js from "@eslint/js";
-import importPlugin from "eslint-plugin-import";
-import playwrightPlugin from "eslint-plugin-playwright";
-import prettierPlugin from "eslint-plugin-prettier";
-import simpleImportSortPlugin from "eslint-plugin-simple-import-sort";
-import unicornPlugin from "eslint-plugin-unicorn";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-
-import { globalIgnores } from "eslint/config";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
-
-// eslint-disable-next-line import/no-anonymous-default-export
-export default [
-  globalIgnores(["node_modules/", ".next/", "dist/", "build/"]),
-
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
-
-  {
-    files: ["**/*.{js,ts,jsx,tsx}"],
-    ignores: ["node_modules", ".next", "dist", "build"],
-
-    plugins: {
-      unicorn: unicornPlugin,
-      import: importPlugin,
-      playwright: playwrightPlugin,
-      prettier: prettierPlugin,
-      "simple-import-sort": simpleImportSortPlugin,
-    },
-    rules: {
-      "simple-import-sort/exports": "error",
-      "simple-import-sort/imports": "error",
-      "unicorn/no-array-callback-reference": "off",
-      "unicorn/no-array-for-each": "off",
-      "unicorn/no-array-reduce": "off",
-      "unicorn/prevent-abbreviations": "off",
-    },
+module.exports = {
+  root: true,
+  env: {
+    node: true,
+    es6: true,
   },
-];
+  parserOptions: { ecmaVersion: "latest", sourceType: "module" },
+  ignorePatterns: [
+    "node_modules/*",
+    "public/mockServiceWorker.js",
+    "generators/*",
+  ],
+  extends: ["eslint:recommended", "next/core-web-vitals"],
+  overrides: [
+    {
+      files: ["**/*.ts", "**/*.tsx"],
+      parser: "@typescript-eslint/parser",
+      settings: {
+        react: { version: "detect" },
+        "import/resolver": {
+          typescript: {},
+        },
+      },
+      env: {
+        browser: true,
+        node: true,
+        es6: true,
+      },
+      extends: [
+        "eslint:recommended",
+        "plugin:import/errors",
+        "plugin:import/warnings",
+        "plugin:import/typescript",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:react/recommended",
+        "plugin:react-hooks/recommended",
+        "plugin:jsx-a11y/recommended",
+        "plugin:prettier/recommended",
+        "plugin:testing-library/react",
+        "plugin:jest-dom/recommended",
+        "plugin:tailwindcss/recommended",
+        "plugin:vitest/legacy-recommended",
+      ],
+      rules: {
+        "@next/next/no-img-element": "off",
+        "import/no-restricted-paths": [
+          "error",
+          {
+            zones: [
+              // disables cross-feature imports:
+              // eg. src/features/discussions should not import from src/features/comments, etc.
+
+              {
+                target: "./src/features/tracks",
+                from: "./src/features",
+                except: ["./tracks"],
+              },
+              // enforce unidirectional codebase:
+
+              // e.g. src/app can import from src/features but not the other way around
+              {
+                target: "./src/features",
+                from: "./src/app",
+              },
+
+              // e.g src/features and src/app can import from these shared modules but not the other way around
+              {
+                target: [
+                  "./src/components",
+                  "./src/hooks",
+                  "./src/lib",
+                  "./src/types",
+                  "./src/utils",
+                ],
+                from: ["./src/features", "./src/app"],
+              },
+            ],
+          },
+        ],
+        "import/no-cycle": "error",
+        "linebreak-style": ["error", "unix"],
+        "react/prop-types": "off",
+        "import/order": [
+          "error",
+          {
+            groups: [
+              "builtin",
+              "external",
+              "internal",
+              "parent",
+              "sibling",
+              "index",
+              "object",
+            ],
+            "newlines-between": "always",
+            alphabetize: { order: "asc", caseInsensitive: true },
+          },
+        ],
+        "import/default": "off",
+        "import/no-named-as-default-member": "off",
+        "import/no-named-as-default": "off",
+        "react/react-in-jsx-scope": "off",
+        "jsx-a11y/anchor-is-valid": "off",
+        "@typescript-eslint/no-unused-vars": ["error"],
+        "@typescript-eslint/explicit-function-return-type": ["off"],
+        "@typescript-eslint/explicit-module-boundary-types": ["off"],
+        "@typescript-eslint/no-empty-function": ["off"],
+        "@typescript-eslint/no-explicit-any": ["off"],
+        "prettier/prettier": ["error", {}, { usePrettierrc: true }],
+      },
+    },
+    {
+      plugins: ["check-file"],
+      files: ["src/**/*"],
+      rules: {
+        "check-file/filename-naming-convention": [
+          "error",
+          {
+            "**/*.{ts,tsx}": "KEBAB_CASE",
+          },
+          {
+            ignoreMiddleExtensions: true,
+          },
+        ],
+        "check-file/folder-naming-convention": [
+          "error",
+          {
+            "!(src/app)/**/*": "KEBAB_CASE",
+            "!(**/__tests__)/**/*": "KEBAB_CASE",
+          },
+        ],
+      },
+    },
+  ],
+};
