@@ -11,6 +11,7 @@ import {
   TrackSchema,
 } from "../schemas/schemas";
 import { TrackFilters } from "../types";
+import { A, D, G, pipe } from "@mobily/ts-belt";
 
 const SERVER_BASE_URL = "http://localhost:8000";
 const API_BASE_URL = `${SERVER_BASE_URL}/api`;
@@ -52,13 +53,14 @@ const makeRequest = <T>(
 
 const buildQueryParams = (filters: TrackFilters): string => {
   const params = new URLSearchParams();
-
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value != null && value !== "") {
-      params.append(key, String(value));
-    }
-  });
-
+  pipe(
+    D.toPairs(filters),
+    A.forEach(([key, value]) => {
+      if (!G.isNullable(value) && value !== "") {
+        params.append(key, String(value));
+      }
+    })
+  );
   return params.toString();
 };
 
@@ -140,7 +142,15 @@ export const api = {
   },
 
   getArtists() {
-    return this.getTracks({ limit: 999, page: 1 }).map((response) => {
+    return this.getTracks({
+      limit: 999,
+      page: 1,
+      search: "",
+      genre: "",
+      artist: "",
+      sort: "",
+      order: "",
+    }).map((response) => {
       const artists = new Set<string>();
 
       response.data.forEach((track) => {
