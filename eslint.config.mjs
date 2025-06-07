@@ -47,23 +47,17 @@ module.exports = {
           "error",
           {
             zones: [
-              // disables cross-feature imports:
-              // eg. src/features/discussions should not import from src/features/comments, etc.
-
               {
                 target: "./src/features/tracks",
                 from: "./src/features",
                 except: ["./tracks"],
               },
-              // enforce unidirectional codebase:
 
-              // e.g. src/app can import from src/features but not the other way around
               {
                 target: "./src/features",
                 from: "./src/app",
               },
 
-              // e.g src/features and src/app can import from these shared modules but not the other way around
               {
                 target: [
                   "./src/components",

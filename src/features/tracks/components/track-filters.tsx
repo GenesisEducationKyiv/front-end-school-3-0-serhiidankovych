@@ -1,13 +1,10 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { ResultAsync } from "neverthrow";
 import { useEffect, useState } from "react";
+import { D, R } from "@mobily/ts-belt";
 
 import { Input } from "@/components/ui/input";
-
-import { api } from "../api/api";
-import { ComponentTrackFilters } from "../types";
 import {
   Select,
   SelectContent,
@@ -15,6 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ComponentTrackFilters } from "../types";
+import { api, ApiError } from "../api/api";
 
 interface TrackFiltersProps {
   filters: ComponentTrackFilters;
@@ -22,24 +21,33 @@ interface TrackFiltersProps {
 }
 
 export function TrackFilters({ filters, updateFilters }: TrackFiltersProps) {
-  const [genres, setGenres] = useState<string[]>([]);
-  const [artists, setArtists] = useState<string[]>([]);
+  const [genres, setGenres] = useState<R.Result<string[], Error>>(R.Ok([]));
+  const [artists, setArtists] = useState<R.Result<string[], Error>>(R.Ok([]));
+
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchFilterOptions = async () => {
       setIsLoading(true);
-      const genresResult = api.getGenres();
-      const artistsResult = api.getArtists();
-      const [genresData, artistsData] = await ResultAsync.combine([
-        genresResult,
-        artistsResult,
-      ]).unwrapOr([[], []]);
 
-      setGenres(genresData);
-      setArtists(artistsData);
+      const [genresResult, artistsResult] = await Promise.all([
+        api.getGenres(),
+        api.getArtists(),
+      ]);
+
+      genresResult.match(
+        (data) => setGenres(R.Ok(data)),
+        (err: ApiError) => setGenres(R.Error(new Error(err.message)))
+      );
+
+      artistsResult.match(
+        (data) => setArtists(R.Ok(data)),
+        (err: ApiError) => setArtists(R.Error(new Error(err.message)))
+      );
+
       setIsLoading(false);
     };
+
     fetchFilterOptions();
   }, []);
 
@@ -52,27 +60,15 @@ export function TrackFilters({ filters, updateFilters }: TrackFiltersProps) {
     { field: "createdAt", direction: "asc", label: "Oldest First" },
   ];
 
-  const handleSimpleFilterChange = (
-    key: keyof ComponentTrackFilters,
-    value: string
-  ) => {
-    updateFilters({ [key]: value === "all" ? undefined : value });
-  };
-
   const handleSortChange = (value: string) => {
     if (value === "default") {
       updateFilters({ sort: undefined, order: undefined });
     } else {
-      const selectedOption = sortOptions.find(
-        (option) => `${option.field}:${option.direction}` === value
-      );
-
-      if (selectedOption) {
-        updateFilters({
-          sort: selectedOption.field as ComponentTrackFilters["sort"],
-          order: selectedOption.direction as ComponentTrackFilters["order"],
-        });
-      }
+      const [field, direction] = value.split(":");
+      updateFilters({
+        sort: field as ComponentTrackFilters["sort"],
+        order: direction as ComponentTrackFilters["order"],
+      });
     }
   };
 
@@ -85,7 +81,7 @@ export function TrackFilters({ filters, updateFilters }: TrackFiltersProps) {
 
   const handleClearFilters = () => {
     updateFilters({
-      search: "",
+      search: undefined,
       genre: undefined,
       artist: undefined,
       sort: undefined,
@@ -93,12 +89,33 @@ export function TrackFilters({ filters, updateFilters }: TrackFiltersProps) {
     });
   };
 
-  const hasActiveFilters =
-    filters.search ||
-    filters.genre ||
-    filters.artist ||
-    filters.sort ||
-    filters.order;
+  const hasActiveFilters = D.values(filters).some(
+    (v) => v !== undefined && v !== ""
+  );
+
+  const renderSelectItems = (data: R.Result<string[], Error>, noun: string) =>
+    R.match(
+      data,
+      (items) =>
+        items.map((item) => (
+          <SelectItem key={item} value={item}>
+            {item}
+          </SelectItem>
+        )),
+      (error) => [
+        <SelectItem key="error" value="error" disabled>
+          Failed to load {noun}
+        </SelectItem>,
+      ]
+    );
+
+  const isSelectDisabled = (data: R.Result<string[], Error>): boolean => {
+    if (isLoading) return true;
+    return R.getWithDefault(
+      R.map(data, (items) => items.length === 0),
+      true
+    );
+  };
 
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:flex-wrap">
@@ -107,30 +124,29 @@ export function TrackFilters({ filters, updateFilters }: TrackFiltersProps) {
         <Input
           placeholder="Search tracks..."
           value={filters.search || ""}
-          onChange={(e) => updateFilters({ search: e.target.value })}
+          onChange={(e) =>
+            updateFilters({ search: e.target.value || undefined })
+          }
           className="pl-9 w-full"
-          data-testid="search-input"
         />
       </div>
 
       <div className="min-w-[150px]">
         <Select
           value={filters.genre || "all"}
-          onValueChange={(value) => handleSimpleFilterChange("genre", value)}
-          disabled={isLoading || genres.length === 0}
-          aria-disabled={isLoading || genres.length === 0}
-          data-testid="filter-genre"
+          onValueChange={(value) =>
+            updateFilters({ genre: value === "all" ? undefined : value })
+          }
+          disabled={isSelectDisabled(genres)}
         >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Filter by genre" />
+          <SelectTrigger>
+            <SelectValue
+              placeholder={isLoading ? "Loading..." : "Filter by genre"}
+            />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Genres</SelectItem>
-            {genres.map((genre) => (
-              <SelectItem key={genre} value={genre}>
-                {genre}
-              </SelectItem>
-            ))}
+            {renderSelectItems(genres, "genres")}
           </SelectContent>
         </Select>
       </div>
@@ -138,32 +154,26 @@ export function TrackFilters({ filters, updateFilters }: TrackFiltersProps) {
       <div className="min-w-[150px]">
         <Select
           value={filters.artist || "all"}
-          onValueChange={(value) => handleSimpleFilterChange("artist", value)}
-          disabled={isLoading || artists.length === 0}
-          aria-disabled={isLoading || artists.length === 0}
-          data-testid="filter-artist"
+          onValueChange={(value) =>
+            updateFilters({ artist: value === "all" ? undefined : value })
+          }
+          disabled={isSelectDisabled(artists)}
         >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Filter by artist" />
+          <SelectTrigger>
+            <SelectValue
+              placeholder={isLoading ? "Loading..." : "Filter by artist"}
+            />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Artists</SelectItem>
-            {artists.map((artist) => (
-              <SelectItem key={artist} value={artist}>
-                {artist}
-              </SelectItem>
-            ))}
+            {renderSelectItems(artists, "artists")}
           </SelectContent>
         </Select>
       </div>
 
       <div className="min-w-[180px]">
-        <Select
-          value={getCurrentSortValue()}
-          onValueChange={handleSortChange}
-          data-testid="sort-select"
-        >
-          <SelectTrigger className="w-full">
+        <Select value={getCurrentSortValue()} onValueChange={handleSortChange}>
+          <SelectTrigger>
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>

@@ -19,10 +19,10 @@ export function useTracks() {
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<ComponentTrackFilters>({
     search: "",
-    genre: undefined,
-    artist: undefined,
-    sort: undefined,
-    order: undefined,
+    genre: "",
+    artist: "",
+    sort: "title",
+    order: "asc",
   });
 
   const debouncedSearch = useDebounce(filters.search, 500);
@@ -52,7 +52,7 @@ export function useTracks() {
       ...filters,
       page: currentPage,
       limit: ITEMS_PER_PAGE,
-      search: debouncedSearch || undefined,
+      search: debouncedSearch || "",
     };
 
     const result = await api.getTracks(apiFilters);
