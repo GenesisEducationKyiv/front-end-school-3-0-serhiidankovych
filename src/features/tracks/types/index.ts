@@ -11,16 +11,6 @@ export interface Track {
   updatedAt: string;
 }
 
-export interface PaginatedResponse<T> {
-  data: T[];
-  meta: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
-
 export interface TrackFormData {
   title: string;
   artist: string;
@@ -29,8 +19,8 @@ export interface TrackFormData {
   genres: string[];
 }
 
-export type TrackSort = "title" | "artist" | "album" | "createdAt";
-export type TrackOrder = "asc" | "desc";
+export type TrackSort = "title" | "artist" | "album" | "createdAt" | "";
+export type TrackOrder = "asc" | "desc" | "";
 
 export interface ComponentTrackFilters {
   search: string;
@@ -38,19 +28,6 @@ export interface ComponentTrackFilters {
   artist: string;
   sort: TrackSort;
   order: TrackOrder;
-}
-
-// Type guard to validate a string is a valid TrackSort
-export function isTrackSort(value: unknown): value is TrackSort {
-  return (
-    typeof value === "string" &&
-    ["title", "artist", "album", "createdAt"].includes(value)
-  );
-}
-
-// Type guard to validate a string is a valid TrackOrder
-export function isTrackOrder(value: unknown): value is TrackOrder {
-  return typeof value === "string" && ["asc", "desc"].includes(value);
 }
 
 export interface TrackFilters {

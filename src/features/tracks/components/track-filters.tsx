@@ -1,6 +1,6 @@
 "use client";
 
-import { Search } from "lucide-react";
+import { ArrowDown, ArrowUp, Loader2, Search, Shuffle, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { D, R } from "@mobily/ts-belt";
 
@@ -9,11 +9,12 @@ import {
   Select,
   SelectContent,
   SelectItem,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { ComponentTrackFilters } from "../types";
-import { api, ApiError } from "../api/api";
+import { api } from "../api/api";
 
 interface TrackFiltersProps {
   filters: ComponentTrackFilters;
@@ -35,14 +36,9 @@ export function TrackFilters({ filters, updateFilters }: TrackFiltersProps) {
         api.getArtists(),
       ]);
 
-      genresResult.match(
-        (data) => setGenres(R.Ok(data)),
-        (err: ApiError) => setGenres(R.Error(new Error(err.message)))
-      );
-
-      artistsResult.match(
-        (data) => setArtists(R.Ok(data)),
-        (err: ApiError) => setArtists(R.Error(new Error(err.message)))
+      setGenres(R.mapError(genresResult, (error) => new Error(error.message)));
+      setArtists(
+        R.mapError(artistsResult, (error) => new Error(error.message))
       );
 
       setIsLoading(false);
@@ -118,87 +114,135 @@ export function TrackFilters({ filters, updateFilters }: TrackFiltersProps) {
   };
 
   return (
-    <div className="flex flex-col gap-4 md:flex-row md:items-center md:flex-wrap">
-      <div className="relative flex-grow md:flex-grow-0 md:min-w-[250px]">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search tracks..."
-          value={filters.search || ""}
-          onChange={(e) =>
-            updateFilters({ search: e.target.value || undefined })
-          }
-          className="pl-9 w-full"
-        />
-      </div>
-
-      <div className="min-w-[150px]">
-        <Select
-          value={filters.genre || "all"}
-          onValueChange={(value) =>
-            updateFilters({ genre: value === "all" ? undefined : value })
-          }
-          disabled={isSelectDisabled(genres)}
-        >
-          <SelectTrigger>
-            <SelectValue
-              placeholder={isLoading ? "Loading..." : "Filter by genre"}
+    <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-4 shadow-sm">
+      <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
+        <div className="flex-1 min-w-0 max-w-md">
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+            <Input
+              placeholder="Search by title, artist, or album..."
+              value={filters.search || ""}
+              onChange={(e) =>
+                updateFilters({ search: e.target.value || undefined })
+              }
+              className="pl-9 h-9 bg-background/50 border-border/60 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200"
             />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Genres</SelectItem>
-            {renderSelectItems(genres, "genres")}
-          </SelectContent>
-        </Select>
-      </div>
+          </div>
+        </div>
 
-      <div className="min-w-[150px]">
-        <Select
-          value={filters.artist || "all"}
-          onValueChange={(value) =>
-            updateFilters({ artist: value === "all" ? undefined : value })
-          }
-          disabled={isSelectDisabled(artists)}
-        >
-          <SelectTrigger>
-            <SelectValue
-              placeholder={isLoading ? "Loading..." : "Filter by artist"}
-            />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Artists</SelectItem>
-            {renderSelectItems(artists, "artists")}
-          </SelectContent>
-        </Select>
-      </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Select
+              value={filters.genre || "all"}
+              onValueChange={(value) =>
+                updateFilters({ genre: value === "all" ? undefined : value })
+              }
+              disabled={isSelectDisabled(genres)}
+            >
+              <SelectTrigger className="h-9 w-32 bg-background/50 border-border/60 hover:border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                <SelectValue
+                  placeholder={
+                    isLoading ? (
+                      <span className="flex items-center gap-1">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        <span className="text-xs">Loading...</span>
+                      </span>
+                    ) : (
+                      <span className="text-xs">All</span>
+                    )
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent className="bg-popover/95 backdrop-blur-sm border-border/50">
+                <SelectItem value="all" className="font-medium text-xs">
+                  All Genres
+                </SelectItem>
+                <SelectSeparator />
+                {renderSelectItems(genres, "genres")}
+              </SelectContent>
+            </Select>
+          </div>
 
-      <div className="min-w-[180px]">
-        <Select value={getCurrentSortValue()} onValueChange={handleSortChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="default">Default Sorting</SelectItem>
-            {sortOptions.map((option) => (
-              <SelectItem
-                key={`${option.field}:${option.direction}`}
-                value={`${option.field}:${option.direction}`}
+          <div className="flex items-center gap-2">
+            <Select
+              value={filters.artist || "all"}
+              onValueChange={(value) =>
+                updateFilters({ artist: value === "all" ? undefined : value })
+              }
+              disabled={isSelectDisabled(artists)}
+            >
+              <SelectTrigger className="h-9 w-32 bg-background/50 border-border/60 hover:border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                <SelectValue
+                  placeholder={
+                    isLoading ? (
+                      <span className="flex items-center gap-1">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        <span className="text-xs">Loading...</span>
+                      </span>
+                    ) : (
+                      <span className="text-xs">All</span>
+                    )
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent className="bg-popover/95 backdrop-blur-sm border-border/50">
+                <SelectItem value="all" className="font-medium text-xs">
+                  All Artists
+                </SelectItem>
+                <SelectSeparator />
+                {renderSelectItems(artists, "artists")}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Select
+              value={getCurrentSortValue()}
+              onValueChange={handleSortChange}
+            >
+              <SelectTrigger className="h-9 w-40 bg-background/50 border-border/60 hover:border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200">
+                <SelectValue placeholder="Choose sorting" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover/95 backdrop-blur-sm border-border/50">
+                <SelectItem value="default" className="font-medium">
+                  <div className="flex items-center gap-2">
+                    <Shuffle className="h-3 w-3" />
+                    Default Order
+                  </div>
+                </SelectItem>
+                <SelectSeparator />
+                {sortOptions.map((option) => (
+                  <SelectItem
+                    key={`${option.field}:${option.direction}`}
+                    value={`${option.field}:${option.direction}`}
+                    className="flex items-center gap-2"
+                  >
+                    {option.direction === "asc" ? (
+                      <ArrowUp className="h-3 w-3" />
+                    ) : (
+                      <ArrowDown className="h-3 w-3" />
+                    )}
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {hasActiveFilters && (
+            <>
+              <button
+                onClick={handleClearFilters}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-destructive bg-muted/50 hover:bg-destructive/10 border border-border/50 rounded-md transition-all duration-200 hover:border-destructive/20"
+                data-testid="clear-filters"
               >
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+                <X className="h-3 w-3" />
+                Clear
+              </button>
+            </>
+          )}
+        </div>
       </div>
-
-      {hasActiveFilters && (
-        <button
-          onClick={handleClearFilters}
-          className="text-sm text-primary hover:text-primary/80 transition-colors whitespace-nowrap"
-          data-testid="clear-filters"
-        >
-          Clear filters
-        </button>
-      )}
     </div>
   );
 }

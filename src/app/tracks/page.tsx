@@ -165,7 +165,7 @@ export default function TracksPage() {
       <div className="mb-6">
         <TrackFilters filters={filters} updateFilters={updateFilters} />
       </div>
-      <div className="mb-4 flex flex-col-reverse items-center justify-between sm:flex-row">
+      <div className="mb-4 flex  items-center justify-between sm:flex-row">
         <div className="text-sm text-muted-foreground">
           {isLoading || isRefreshing ? (
             <span
@@ -205,7 +205,7 @@ export default function TracksPage() {
         <div className="mb-4 p-4 border rounded-md bg-destructive/10 text-destructive flex items-center justify-between">
           <div className="flex items-center">
             <AlertCircle className="h-4 w-4 mr-2" />
-            <span>Error loading tracks: {error}</span>
+            <span>Error loading tracks</span>
           </div>
           <Button
             variant="outline"

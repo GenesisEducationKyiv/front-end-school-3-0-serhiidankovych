@@ -1,6 +1,7 @@
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { R } from "@mobily/ts-belt";
 
 import {
   AlertDialog,
@@ -14,7 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import { api } from "../api/api";
-import { Track } from "../schemas/schemas";
+import { MultipleDeleteResponse, Track } from "../schemas/schemas";
 
 interface DeleteTrackDialogProps {
   isOpen: boolean;
@@ -44,42 +45,47 @@ export function DeleteTrackDialog({
     if (isMultiple) {
       const result = await api.multipleDeleteTracks(trackIdsToDelete);
 
-      if (result.isOk()) {
-        const data = result.value as { success: string[]; failed: string[] };
-
-        if (data.failed?.length > 0) {
-          toast.warning(
-            `${data.success.length} tracks deleted, ${data.failed.length} failed.`,
-            {
-              description: `Failed IDs: ${data.failed.join(", ")}`,
-            }
-          );
-        } else {
-          toast.success(`${trackIdsToDelete.length} Tracks deleted`);
+      R.match(
+        result,
+        (data: MultipleDeleteResponse) => {
+          if (data.failed?.length > 0) {
+            toast.warning(
+              `${data.success.length} tracks deleted, ${data.failed.length} failed.`,
+              {
+                description: `Failed IDs: ${data.failed.join(", ")}`,
+              }
+            );
+          } else {
+            toast.success(
+              `${trackIdsToDelete.length} tracks deleted successfully.`
+            );
+          }
+          parentOnSuccess();
+        },
+        (apiError) => {
+          toast.error("Delete failed", {
+            description: apiError.message,
+          });
         }
-        parentOnSuccess();
-      } else {
-        const apiError = result.error;
-
-        toast.error("Delete failed", {
-          description: apiError.error || "An unexpected error occurred",
-        });
-      }
+      );
     } else {
       const result = await api.deleteTrack(trackIdsToDelete[0]);
 
-      if (result.isOk()) {
-        const singleTrackTitle = tracksToDelete[0]?.title || "this track";
-        toast.success("Track deleted", {
-          description: `"${singleTrackTitle}" has been deleted successfully.`,
-        });
-        parentOnSuccess();
-      } else {
-        const apiError = result.error;
-        toast.error("Delete failed", {
-          description: apiError.error || "An unexpected error occurred",
-        });
-      }
+      R.match(
+        result,
+        () => {
+          const singleTrackTitle = tracksToDelete[0]?.title || "this track";
+          toast.success("Track deleted", {
+            description: `"${singleTrackTitle}" has been deleted successfully.`,
+          });
+          parentOnSuccess();
+        },
+        (apiError) => {
+          toast.error("Delete failed", {
+            description: apiError.message,
+          });
+        }
+      );
     }
 
     setIsDeleting(false);
