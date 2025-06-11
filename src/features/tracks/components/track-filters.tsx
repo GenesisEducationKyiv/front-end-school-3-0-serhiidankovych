@@ -1,9 +1,7 @@
 "use client";
-
 import { ArrowDown, ArrowUp, Loader2, Search, Shuffle, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { D, R } from "@mobily/ts-belt";
-
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -21,29 +19,36 @@ interface TrackFiltersProps {
   updateFilters: (filters: Partial<ComponentTrackFilters>) => void;
 }
 
+const isValidSortField = (
+  field: string
+): field is ComponentTrackFilters["sort"] => {
+  return ["title", "artist", "createdAt"].includes(field);
+};
+
+const isValidSortOrder = (
+  order: string
+): order is ComponentTrackFilters["order"] => {
+  return ["asc", "desc"].includes(order);
+};
+
 export function TrackFilters({ filters, updateFilters }: TrackFiltersProps) {
   const [genres, setGenres] = useState<R.Result<string[], Error>>(R.Ok([]));
   const [artists, setArtists] = useState<R.Result<string[], Error>>(R.Ok([]));
-
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchFilterOptions = async () => {
       setIsLoading(true);
-
       const [genresResult, artistsResult] = await Promise.all([
         api.getGenres(),
         api.getArtists(),
       ]);
-
       setGenres(R.mapError(genresResult, (error) => new Error(error.message)));
       setArtists(
         R.mapError(artistsResult, (error) => new Error(error.message))
       );
-
       setIsLoading(false);
     };
-
     fetchFilterOptions();
   }, []);
 
@@ -54,17 +59,27 @@ export function TrackFilters({ filters, updateFilters }: TrackFiltersProps) {
     { field: "artist", direction: "desc", label: "Artist (Z-A)" },
     { field: "createdAt", direction: "desc", label: "Newest First" },
     { field: "createdAt", direction: "asc", label: "Oldest First" },
-  ];
+  ] as const;
 
   const handleSortChange = (value: string) => {
     if (value === "default") {
       updateFilters({ sort: undefined, order: undefined });
     } else {
       const [field, direction] = value.split(":");
-      updateFilters({
-        sort: field as ComponentTrackFilters["sort"],
-        order: direction as ComponentTrackFilters["order"],
-      });
+
+      if (
+        field &&
+        direction &&
+        isValidSortField(field) &&
+        isValidSortOrder(direction)
+      ) {
+        updateFilters({
+          sort: field,
+          order: direction,
+        });
+      } else {
+        updateFilters({ sort: undefined, order: undefined });
+      }
     }
   };
 
