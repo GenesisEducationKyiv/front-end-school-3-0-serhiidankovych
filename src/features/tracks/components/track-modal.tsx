@@ -1,7 +1,7 @@
 import { AlertCircle, Loader2, Pencil, PlusCircle } from "lucide-react";
-import { ResultAsync } from "neverthrow";
 import { useState } from "react";
 import { toast } from "sonner";
+import { R } from "@mobily/ts-belt";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -43,15 +43,22 @@ export function TrackModal({
 
   const getTrackOperation = (
     data: TrackFormData
-  ): ResultAsync<Track, ApiError> | null => {
+  ): Promise<R.Result<Track, ApiError>> | null => {
     if (isEditMode) {
-      if (!track) {
-        toast.error("Cannot update: Track data missing.");
+      if (!track?.id) {
+        toast.error("Cannot update: Track data or ID is missing.");
         return null;
       }
-      return api
-        .updateTrack(track.id, data)
-        .map((updatedTrack) => ({ ...track, ...updatedTrack } as Track));
+
+      const updateAndMap = async () => {
+        const result = await api.updateTrack(track.id, data);
+
+        return R.map(result, (updatedTrack) => ({
+          ...track,
+          ...updatedTrack,
+        }));
+      };
+      return updateAndMap();
     } else {
       return api.createTrack(data);
     }
@@ -69,21 +76,20 @@ export function TrackModal({
 
     const result = await operation;
 
-    if (result.isOk()) {
-      const processedTrack = result.value;
-      const actionText = isEditMode ? "updated" : "created";
-
-      toast.success(`Track ${actionText}`, {
-        description: `"${processedTrack.title}" was ${actionText} successfully.`,
-        duration: 3000,
-      });
-
-      parentOnSuccess(processedTrack);
-      if (!isEditMode) onClose();
-    } else {
-      const apiError = result.error;
-      setError(apiError.error || "An unexpected error occurred");
-    }
+    R.match(
+      result,
+      (processedTrack) => {
+        const actionText = isEditMode ? "updated" : "created";
+        toast.success(`Track ${actionText}`, {
+          description: `"${processedTrack.title}" was ${actionText} successfully.`,
+        });
+        parentOnSuccess(processedTrack);
+        if (!isEditMode) onClose();
+      },
+      (apiError) => {
+        setError(apiError.message || "An unexpected error occurred");
+      }
+    );
 
     setIsSubmitting(false);
   };

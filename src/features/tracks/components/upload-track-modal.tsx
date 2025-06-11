@@ -1,6 +1,7 @@
 import { FileAudio, Loader2, Trash, Upload, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { O, R } from "@mobily/ts-belt";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -38,7 +39,7 @@ export function UploadTrackModal({
 
   useEffect(() => {
     if (track?.audioFile) {
-      setAudioUrl(api.getTrackAudioUrl(track.audioFile));
+      setAudioUrl(O.toNullable(api.getTrackAudioUrl(track.audioFile)));
     } else {
       setAudioUrl(null);
     }
@@ -97,24 +98,26 @@ export function UploadTrackModal({
 
     const result = await api.uploadTrackAudio(track.id, selectedFile);
 
-    if (result.isOk()) {
-      setUploadProgress(100);
-      toast.success("Upload successful", {
-        description: `Audio file "${selectedFile.name}" has been uploaded.`,
-      });
-      setTimeout(() => {
-        resetState();
-        onSuccess();
-      }, 800);
-    } else {
-      const apiError = result.error;
-      setUploadProgress(0);
-      setIsUploading(false);
-
-      toast.error("Upload failed", {
-        description: apiError.error || "An unexpected error occurred",
-      });
-    }
+    R.match(
+      result,
+      () => {
+        setUploadProgress(100);
+        toast.success("Upload successful", {
+          description: `Audio file "${selectedFile.name}" has been uploaded.`,
+        });
+        setTimeout(() => {
+          resetState();
+          onSuccess();
+        }, 800);
+      },
+      (apiError) => {
+        setUploadProgress(0);
+        setIsUploading(false);
+        toast.error("Upload failed", {
+          description: apiError.message,
+        });
+      }
+    );
   };
 
   const handleRemoveFile = async () => {
@@ -123,20 +126,23 @@ export function UploadTrackModal({
     setIsRemoving(true);
     const result = await api.removeTrackAudio(track.id);
 
-    if (result.isOk()) {
-      toast.success("File removed", {
-        description: "The audio file has been removed from this track.",
-      });
-      setAudioUrl(null);
-      resetState();
-      onSuccess();
-    } else {
-      const apiError = result.error;
-      setIsRemoving(false);
-      toast.error("Failed to remove file", {
-        description: apiError.message,
-      });
-    }
+    R.match(
+      result,
+      () => {
+        toast.success("File removed", {
+          description: "The audio file has been removed from this track.",
+        });
+        setAudioUrl(null);
+        resetState();
+        onSuccess();
+      },
+      (apiError) => {
+        setIsRemoving(false);
+        toast.error("Failed to remove file", {
+          description: apiError.message,
+        });
+      }
+    );
   };
 
   const handleOpenChange = (open: boolean) => {

@@ -11,26 +11,6 @@ export interface Track {
   updatedAt: string;
 }
 
-export interface PaginatedResponse<T> {
-  data: T[];
-  meta: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
-
-export interface TrackFilters {
-  search?: string;
-  genre?: string;
-  artist?: string;
-  sort?: string;
-  page: number;
-  limit: number;
-  order?: string;
-}
-
 export interface TrackFormData {
   title: string;
   artist: string;
@@ -39,10 +19,23 @@ export interface TrackFormData {
   genres: string[];
 }
 
+export type TrackSort = "title" | "artist" | "album" | "createdAt" | "";
+export type TrackOrder = "asc" | "desc" | "";
+
 export interface ComponentTrackFilters {
   search: string;
-  genre?: string;
-  artist?: string;
-  sort?: "title" | "artist" | "album" | "createdAt";
-  order?: "asc" | "desc";
+  genre: string;
+  artist: string;
+  sort: TrackSort;
+  order: TrackOrder;
+}
+
+export interface TrackFilters {
+  search: string;
+  genre: string;
+  artist: string;
+  sort: string;
+  page: number;
+  limit: number;
+  order: string;
 }
