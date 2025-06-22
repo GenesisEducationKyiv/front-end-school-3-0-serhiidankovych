@@ -1,14 +1,16 @@
-import { R, O, A, D, G, pipe } from "@mobily/ts-belt";
+import { A, D, G, O, pipe } from "@mobily/ts-belt";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { z } from "zod";
-
 import {
   MultipleDeleteResponseSchema,
   PaginatedTrackResponseSchema,
   SingleDeleteResponseSchema,
   TrackFormData,
-  TrackFormSchema,
   TrackSchema,
+  PaginatedTrackResponse,
+  Track,
+  MultipleDeleteResponse,
+  SingleDeleteResponse,
 } from "../schemas/schemas";
 import { TrackFilters } from "../types";
 
@@ -38,27 +40,31 @@ const handleApiError = (error: AxiosError): ApiError => {
   };
 };
 
-const makeRequest = <T extends {}>(
+const makeRequest = async <T>(
   requestFn: () => Promise<AxiosResponse>,
   schema: z.ZodSchema<T>
-): Promise<R.Result<T, ApiError>> => {
-  return requestFn().then(
-    (response) => {
-      const validation = schema.safeParse(response.data);
-      if (validation.success) {
-        return R.Ok(validation.data);
-      }
+): Promise<T> => {
+  try {
+    const response = await requestFn();
+    const validation = schema.safeParse(response.data);
 
-      return R.Error({
-        error: "Validation Error",
-        message: validation.error.errors.map((e) => e.message).join(", "),
-      });
-    },
-
-    (error) => {
-      return R.Error(handleApiError(error as AxiosError));
+    if (validation.success) {
+      return validation.data;
+    } else {
+      const validationErrorMessage = validation.error.errors
+        .map((e) => e.message)
+        .join(", ");
+      throw new Error(
+        `API response validation failed: ${validationErrorMessage}`
+      );
     }
-  );
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw handleApiError(error);
+    } else {
+      throw new Error("An unknown error occurred");
+    }
+  }
 };
 
 const buildQueryParams = (filters: TrackFilters): string => {
@@ -74,21 +80,8 @@ const buildQueryParams = (filters: TrackFilters): string => {
   return params.toString();
 };
 
-const validateFormData = (
-  data: TrackFormData
-): R.Result<TrackFormData, ApiError> => {
-  const validation = TrackFormSchema.safeParse(data);
-  if (validation.success) {
-    return R.Ok(validation.data);
-  }
-  return R.Error({
-    error: "Invalid Form Data",
-    message: validation.error.errors.map((e) => e.message).join(", "),
-  });
-};
-
 export const api = {
-  getTracks(filters: TrackFilters) {
+  getTracks(filters: TrackFilters): Promise<PaginatedTrackResponse> {
     const query = buildQueryParams(filters);
     return makeRequest(
       () => apiClient.get(`/tracks?${query}`),
@@ -96,45 +89,33 @@ export const api = {
     );
   },
 
-  getTrack(slugOrId: string) {
+  getTrack(slugOrId: string): Promise<Track> {
     return makeRequest(() => apiClient.get(`/tracks/${slugOrId}`), TrackSchema);
   },
 
-  async createTrack(
-    data: TrackFormData
-  ): Promise<R.Result<z.infer<typeof TrackSchema>, ApiError>> {
-    const validationResult = validateFormData(data);
-    const validatedData = R.getExn(validationResult);
-
-    if (R.isError(validationResult)) {
-      return validationResult;
-    }
-
-    return makeRequest(
-      () => apiClient.post("/tracks", validatedData),
-      TrackSchema
-    );
+  createTrack(data: TrackFormData): Promise<Track> {
+    return makeRequest(() => apiClient.post("/tracks", data), TrackSchema);
   },
 
-  updateTrack(id: string, data: Partial<TrackFormData>) {
+  updateTrack(id: string, data: Partial<TrackFormData>): Promise<Track> {
     return makeRequest(() => apiClient.put(`/tracks/${id}`, data), TrackSchema);
   },
 
-  deleteTrack(id: string) {
+  deleteTrack(id: string): Promise<SingleDeleteResponse> {
     return makeRequest(
       () => apiClient.delete(`/tracks/${id}`),
       SingleDeleteResponseSchema
     );
   },
 
-  multipleDeleteTracks(ids: string[]) {
+  multipleDeleteTracks(ids: string[]): Promise<MultipleDeleteResponse> {
     return makeRequest(
       () => apiClient.post("/tracks/delete", { ids }),
       MultipleDeleteResponseSchema
     );
   },
 
-  uploadTrackAudio(id: string, file: File) {
+  uploadTrackAudio(id: string, file: File): Promise<Track> {
     const formData = new FormData();
     formData.append("file", file);
     return makeRequest(
@@ -146,15 +127,15 @@ export const api = {
     );
   },
 
-  removeTrackAudio(id: string) {
+  removeTrackAudio(id: string): Promise<Track> {
     return makeRequest(
       () => apiClient.delete(`/tracks/${id}/file`),
       TrackSchema
     );
   },
 
-  async getArtists(): Promise<R.Result<string[], ApiError>> {
-    const result = await this.getTracks({
+  async getArtists(): Promise<string[]> {
+    const response = await this.getTracks({
       limit: 999,
       page: 1,
       search: "",
@@ -164,21 +145,17 @@ export const api = {
       order: "",
     });
 
-    return pipe(
-      result,
-      R.map((response) => {
-        const artists = new Set<string>();
-        response.data.forEach((track) => {
-          if (track.artist) {
-            artists.add(track.artist);
-          }
-        });
-        return Array.from(artists).sort();
-      })
-    );
+    const artists = new Set<string>();
+    response.data.forEach((track) => {
+      if (track.artist) {
+        artists.add(track.artist);
+      }
+    });
+    console.log(artists);
+    return Array.from(artists).sort();
   },
 
-  getGenres() {
+  getGenres(): Promise<string[]> {
     return makeRequest(() => apiClient.get("/genres"), z.array(z.string()));
   },
 
