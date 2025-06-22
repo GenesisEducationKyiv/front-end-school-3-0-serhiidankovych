@@ -9,7 +9,8 @@ import { TrackFilters } from "@/features/tracks/components/track-filters";
 import { TrackList } from "@/features/tracks/components/track-list";
 import { TrackModal } from "@/features/tracks/components/track-modal";
 import { UploadTrackModal } from "@/features/tracks/components/upload-track-modal";
-import { useAudioPlayer } from "@/features/tracks/hooks/use-audio-player";
+
+
 import {
   QueryClient,
   QueryClientProvider,
@@ -18,6 +19,8 @@ import { Track } from "@/features/tracks/schemas/schemas";
 import { ITEMS_PER_PAGE, useTracksQuery } from "@/features/tracks/hooks/use-tracks";
 import { ComponentTrackFilters } from "@/features/tracks/types";
 import React from "react";
+import { useAudioPlayerStore } from "@/features/tracks/store/use-audio-player-store";
+
 
 
 const queryClient = new QueryClient({
@@ -50,7 +53,8 @@ function TracksPageContent() {
   const totalTracks = data?.meta.total ?? 0;
   const totalPages = data?.meta.totalPages ?? 0;
   
-  const { currentTrack, isPlaying, handlePlay, closePlayer } = useAudioPlayer();
+  
+  const { currentTrack, isPlaying, handlePlay, closePlayer } = useAudioPlayerStore();
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
