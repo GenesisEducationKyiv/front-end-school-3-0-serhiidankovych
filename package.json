@@ -41,7 +41,8 @@
     "sonner": "^2.0.5",
     "tailwind-merge": "^3.2.0",
     "wavesurfer.js": "^7.9.4",
-    "zod": "^3.25.56"
+    "zod": "^3.25.56",
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

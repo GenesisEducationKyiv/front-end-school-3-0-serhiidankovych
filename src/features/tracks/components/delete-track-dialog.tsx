@@ -1,7 +1,5 @@
+"use client";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
-import { R } from "@mobily/ts-belt";
 
 import {
   AlertDialog,
@@ -14,8 +12,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-import { api } from "../api/api";
-import { MultipleDeleteResponse, Track } from "../schemas/schemas";
+import { Track } from "../schemas/schemas";
+import { useDeleteTracks } from "../hooks/use-delete-tracks";
+
 
 interface DeleteTrackDialogProps {
   isOpen: boolean;
@@ -30,68 +29,39 @@ export function DeleteTrackDialog({
   tracksToDelete,
   onSuccess: parentOnSuccess,
 }: DeleteTrackDialogProps) {
-  const [isDeleting, setIsDeleting] = useState(false);
-  const isMultiple = tracksToDelete.length > 1;
-  const trackIdsToDelete = tracksToDelete.map((t) => t.id);
+  
+  const deleteMutation = useDeleteTracks();
+  
+  const isDeleting = deleteMutation.isPending;
 
-  const handleDelete = async () => {
-    if (trackIdsToDelete.length === 0) {
+  const isMultiple = tracksToDelete.length > 1;
+  
+  const handleDelete = () => {
+    if (tracksToDelete.length === 0) {
       onClose();
       return;
     }
 
-    setIsDeleting(true);
+    const ids = tracksToDelete.map((t) => t.id);
+    const trackTitles = tracksToDelete.map((t) => t.title);
 
-    if (isMultiple) {
-      const result = await api.multipleDeleteTracks(trackIdsToDelete);
-
-      R.match(
-        result,
-        (data: MultipleDeleteResponse) => {
-          if (data.failed?.length > 0) {
-            toast.warning(
-              `${data.success.length} tracks deleted, ${data.failed.length} failed.`,
-              {
-                description: `Failed IDs: ${data.failed.join(", ")}`,
-              }
-            );
-          } else {
-            toast.success(
-              `${trackIdsToDelete.length} tracks deleted successfully.`
-            );
-          }
-          parentOnSuccess();
+    deleteMutation.mutate(
+      { ids, trackTitles },
+      {
+        
+        onSuccess: () => {
+          parentOnSuccess(); 
+          onClose();
         },
-        (apiError) => {
-          toast.error("Delete failed", {
-            description: apiError.message,
-          });
-        }
-      );
-    } else {
-      const result = await api.deleteTrack(trackIdsToDelete[0]);
+        onError: () => {
 
-      R.match(
-        result,
-        () => {
-          const singleTrackTitle = tracksToDelete[0]?.title || "this track";
-          toast.success("Track deleted", {
-            description: `"${singleTrackTitle}" has been deleted successfully.`,
-          });
-          parentOnSuccess();
+          onClose(); 
         },
-        (apiError) => {
-          toast.error("Delete failed", {
-            description: apiError.message,
-          });
-        }
-      );
-    }
-
-    setIsDeleting(false);
-    onClose();
+      }
+    );
   };
-
+  
+  
   const handleOpenChange = (open: boolean) => {
     if (!open && !isDeleting) {
       onClose();
@@ -104,9 +74,7 @@ export function DeleteTrackDialog({
 
   const dialogDescription = isMultiple
     ? `Are you sure you want to delete these ${tracksToDelete.length} tracks? This action cannot be undone.`
-    : `Are you sure you want to delete "${
-        tracksToDelete[0]?.title || "this track"
-      }"? This action cannot be undone.`;
+    : `Are you sure you want to delete "${tracksToDelete[0]?.title || 'this track'}"? This action cannot be undone.`;
 
   return (
     <AlertDialog
