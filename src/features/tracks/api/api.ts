@@ -1,6 +1,7 @@
 import { A, D, G, O, pipe } from "@mobily/ts-belt";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { z } from "zod";
+import { Sink } from "graphql-ws";
 import {
   MultipleDeleteResponseSchema,
   PaginatedTrackResponseSchema,
@@ -14,14 +15,10 @@ import {
 } from "../schemas/schemas";
 import { TrackFilters } from "../types";
 
-const SERVER_BASE_URL = "http://localhost:8000";
-const API_BASE_URL = `${SERVER_BASE_URL}/api`;
-const STATIC_FILES_PREFIX = "/api/files/";
+import apiClient from "../lib/base-api-client";
+import graphqlClient from "../lib/graphql-client";
 
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: { "Content-Type": "application/json" },
-});
+const FILES_URL = process.env.NEXT_PUBLIC_FILES_URL!;
 
 export interface ApiError {
   error: string;
@@ -151,7 +148,6 @@ export const api = {
         artists.add(track.artist);
       }
     });
-    console.log(artists);
     return Array.from(artists).sort();
   },
 
@@ -162,12 +158,36 @@ export const api = {
   getTrackAudioUrl(audioFileName: string | null): O.Option<string> {
     return pipe(
       O.fromNullable(audioFileName),
-      O.map(
-        (fileName) =>
-          `${SERVER_BASE_URL}${STATIC_FILES_PREFIX}${encodeURIComponent(
-            fileName
-          )}`
-      )
+      O.map((fileName) => `${FILES_URL}${encodeURIComponent(fileName)}`)
     );
+  },
+
+  subscribeToActiveTrack(
+    onData: (trackName: string | null) => void
+  ): () => void {
+    const sink: Sink<{
+      data: {
+        activeTrackChanged: string | null;
+      };
+      activeTrackChanged: string | null;
+    }> = {
+      next: (result) => {
+        const trackName = result.data?.activeTrackChanged ?? null;
+        onData(trackName);
+      },
+      error: (err) => {
+        console.error("Subscription error.");
+      },
+      complete: () => {
+        console.log("Subscription completed.");
+      },
+    };
+    const unsubscribe = graphqlClient.subscribe(
+      {
+        query: "subscription { activeTrackChanged }",
+      },
+      sink
+    );
+    return unsubscribe;
   },
 };

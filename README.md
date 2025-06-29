@@ -70,3 +70,42 @@ bun install && bun dev
 
 Then open [http://localhost:3000](http://localhost:3000) in your browser.
 ```
+
+## ⚙️ Building Setup and Bundle Optimization
+
+To improve performance and reduce the initial load time, we optimized the `/tracks` route by **lazy-loading** heavy libraries and components using Next.js `dynamic()` imports.
+
+### 📊 Bundle Comparison
+
+| Route         | Size                | First Load JS       | Notes                                   |
+| ------------- | ------------------- | ------------------- | --------------------------------------- |
+| `/`           | 175 B               | 105 kB              | No significant change                   |
+| `/_not-found` | 136 B               | 101 kB              | No significant change                   |
+| `/tracks`     | **138 kB → 103 kB** | **255 kB → 210 kB** | 🚀 Optimized by lazy loading components |
+
+---
+
+### 📦 What Was Optimized?
+
+On the `/tracks` page, the following large components and libraries were dynamically imported:
+
+```ts
+const AudioPlayer = dynamic(() =>
+  import('@/features/tracks/components/audio-player').then(mod => mod.AudioPlayer)
+);
+const TrackModal = dynamic(() =>
+  import('@/features/tracks/components/track-modal').then(mod => mod.TrackModal)
+);
+const DeleteTrackDialog = dynamic(() =>
+  import('@/features/tracks/components/delete-track-dialog').then(mod => mod.DeleteTrackDialog)
+);
+const UploadTrackModal = dynamic(() =>
+  import('@/features/tracks/components/upload-track-modal').then(mod => mod.UploadTrackModal)
+);
+```
+
+### ✅ Result
+
+* Reduced `/tracks` route size by **35 kB**
+* Reduced first load JS by **45 kB**
+* Improved performance and time to interactive for users visiting the `/tracks` route
