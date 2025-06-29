@@ -14,6 +14,9 @@ import {
 } from "../schemas/schemas";
 import { TrackFilters } from "../types";
 
+import graphqlClient from "../lib/graphql-client";
+import { Sink } from "graphql-ws";
+
 const SERVER_BASE_URL = "http://localhost:8000";
 const API_BASE_URL = `${SERVER_BASE_URL}/api`;
 const STATIC_FILES_PREFIX = "/api/files/";
@@ -151,7 +154,6 @@ export const api = {
         artists.add(track.artist);
       }
     });
-    console.log(artists);
     return Array.from(artists).sort();
   },
 
@@ -169,5 +171,35 @@ export const api = {
           )}`
       )
     );
+  },
+
+  subscribeToActiveTrack(
+    onData: (trackName: string | null) => void
+  ): () => void {
+    const sink: Sink<{
+      data: {
+        activeTrackChanged: string | null;
+      };
+      activeTrackChanged: string | null;
+    }> = {
+      next: (result) => {
+        const trackName = result.data?.activeTrackChanged ?? null;
+        console.log(result.data);
+        onData(trackName);
+      },
+      error: (err) => {
+        console.error("Subscription error.");
+      },
+      complete: () => {
+        console.log("Subscription completed.");
+      },
+    };
+    const unsubscribe = graphqlClient.subscribe(
+      {
+        query: "subscription { activeTrackChanged }",
+      },
+      sink
+    );
+    return unsubscribe;
   },
 };
