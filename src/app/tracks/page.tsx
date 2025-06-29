@@ -1,14 +1,26 @@
 "use client";
+import dynamic from 'next/dynamic';
 import { AlertCircle, CopyX, Loader2, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
-import { AudioPlayer } from "@/features/tracks/components/audio-player";
-import { DeleteTrackDialog } from "@/features/tracks/components/delete-track-dialog";
+
 import { TrackFilters } from "@/features/tracks/components/track-filters";
 import { TrackList } from "@/features/tracks/components/track-list";
-import { TrackModal } from "@/features/tracks/components/track-modal";
-import { UploadTrackModal } from "@/features/tracks/components/upload-track-modal";
+
+const AudioPlayer = dynamic(() => 
+  import('@/features/tracks/components/audio-player').then(mod => mod.AudioPlayer),
+);
+
+const TrackModal = dynamic(() =>
+  import('@/features/tracks/components/track-modal').then(mod => mod.TrackModal)
+);
+const DeleteTrackDialog = dynamic(() =>
+  import('@/features/tracks/components/delete-track-dialog').then(mod => mod.DeleteTrackDialog)
+);
+const UploadTrackModal = dynamic(() =>
+  import('@/features/tracks/components/upload-track-modal').then(mod => mod.UploadTrackModal)
+);
 
 import {
   QueryClient,
