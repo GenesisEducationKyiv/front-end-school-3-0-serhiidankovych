@@ -10,7 +10,6 @@ import { TrackList } from "@/features/tracks/components/track-list";
 import { TrackModal } from "@/features/tracks/components/track-modal";
 import { UploadTrackModal } from "@/features/tracks/components/upload-track-modal";
 
-
 import {
   QueryClient,
   QueryClientProvider,
@@ -20,8 +19,7 @@ import { ITEMS_PER_PAGE, useTracksQuery } from "@/features/tracks/hooks/use-trac
 import { ComponentTrackFilters } from "@/features/tracks/types";
 import React from "react";
 import { useAudioPlayerStore } from "@/features/tracks/store/use-audio-player-store";
-
-
+import ActiveTrackDisplay from "@/features/tracks/components/active-track";
 
 const queryClient = new QueryClient({
 });
@@ -52,7 +50,6 @@ function TracksPageContent() {
   const tracks = data?.data ?? [];
   const totalTracks = data?.meta.total ?? 0;
   const totalPages = data?.meta.totalPages ?? 0;
-  
   
   const { currentTrack, isPlaying, handlePlay, closePlayer } = useAudioPlayerStore();
   
@@ -196,6 +193,7 @@ function TracksPageContent() {
       {selectedTrackToUpload && (
         <UploadTrackModal isOpen={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)} track={selectedTrackToUpload} onSuccess={() => {}} />
       )}
+      <ActiveTrackDisplay/>
     </div>
   );
 }
