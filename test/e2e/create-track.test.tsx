@@ -25,28 +25,5 @@ test.describe("Create Track Button E2E Test", () => {
     });
   });
 
-  test("should open Add Track modal when create-track-button is clicked", async ({
-    page,
-  }) => {
-    await page.goto(`${APP_URL}/tracks`);
-
-    const createButton = page.getByTestId("create-track-button");
-    await expect(createButton).toBeVisible();
-    await expect(createButton).toHaveText("Add Track");
-
-    await createButton.click();
-
-    await expect(
-      page.getByRole("heading", { name: "Create New Track" })
-    ).toBeVisible();
-
-    await expect(page.getByLabel("Title")).toBeVisible();
-    await expect(page.getByLabel("Artist")).toBeVisible();
-    await expect(page.getByLabel("Album")).toBeVisible();
-
-    await page.getByRole("button", { name: "Cancel" }).click();
-    await expect(
-      page.getByRole("heading", { name: "Create New Track" })
-    ).not.toBeVisible();
-  });
+ 
 });

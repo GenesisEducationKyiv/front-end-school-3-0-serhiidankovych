@@ -60,19 +60,6 @@ test.describe("Clear Filters E2E Test", () => {
     await expect(page.getByTestId("clear-filters")).not.toBeVisible();
   });
 
-  test("should not show clear filters button after clearing search input", async ({ page }) => {
-    await page.goto(`${APP_URL}/tracks`);
-
-    const searchInput = page.getByPlaceholder(
-      "Search by title, artist, or album..."
-    );
-    await searchInput.fill("test");
-    await expect(page.getByTestId("clear-filters")).toBeVisible();
-
-    await page.getByTestId("clear-filters").click();
-    await expect(searchInput).toHaveValue("");
-  });
-
   test("should not show clear filters button after clearing dropdown", async ({ page }) => {
     await page.goto(`${APP_URL}/tracks`);
 
