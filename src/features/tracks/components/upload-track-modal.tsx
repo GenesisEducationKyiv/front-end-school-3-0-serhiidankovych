@@ -1,7 +1,7 @@
+import { O } from "@mobily/ts-belt";
 import { FileAudio, Loader2, Trash, Upload, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { O } from "@mobily/ts-belt";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,8 +16,7 @@ import { Progress } from "@/components/ui/progress";
 import { Track } from "@/features/tracks/schemas/schemas";
 
 import { api } from "../api/api";
-
-import { useUploadTrackAudio, useRemoveTrackAudio } from "../hooks/use-track-audio";
+import { useRemoveTrackAudio,useUploadTrackAudio } from "../hooks/use-track-audio";
 
 interface UploadTrackModalProps {
   isOpen: boolean;

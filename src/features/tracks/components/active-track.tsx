@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { api } from "../api/api"
+
 import {
   Card,
   CardContent,
@@ -9,6 +9,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'; 
+
+import { api } from "../api/api"
 
 export default function ActiveTrackDisplay() {
   const [activeTrack, setActiveTrack] = useState<string | null>('Connecting...');

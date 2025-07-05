@@ -1,10 +1,10 @@
 "use client";
-import dynamic from 'next/dynamic';
 import { AlertCircle, CopyX, Loader2, Plus, Trash2 } from "lucide-react";
+import dynamic from 'next/dynamic';
 import { useMemo, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
-
 import { TrackFilters } from "@/features/tracks/components/track-filters";
 import { TrackList } from "@/features/tracks/components/track-list";
 
@@ -26,12 +26,13 @@ import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query'
-import { Track } from "@/features/tracks/schemas/schemas";
-import { ITEMS_PER_PAGE, useTracksQuery } from "@/features/tracks/hooks/use-tracks";
-import { ComponentTrackFilters } from "@/features/tracks/types";
 import React from "react";
-import { useAudioPlayerStore } from "@/features/tracks/store/use-audio-player-store";
+
 import ActiveTrackDisplay from "@/features/tracks/components/active-track";
+import { ITEMS_PER_PAGE, useTracksQuery } from "@/features/tracks/hooks/use-tracks";
+import { Track } from "@/features/tracks/schemas/schemas";
+import { useAudioPlayerStore } from "@/features/tracks/store/use-audio-player-store";
+import { ComponentTrackFilters } from "@/features/tracks/types";
 
 const queryClient = new QueryClient({
 });
