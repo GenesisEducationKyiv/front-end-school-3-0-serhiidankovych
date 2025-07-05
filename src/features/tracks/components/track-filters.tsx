@@ -1,7 +1,8 @@
 "use client";
+import { D } from "@mobily/ts-belt";
 import { ArrowDown, ArrowUp, Loader2, Search, Shuffle, X } from "lucide-react";
 import { useMemo } from "react";
-import { D } from "@mobily/ts-belt";
+
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -11,9 +12,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ComponentTrackFilters } from "../types"; 
-import { useGenres } from "../hooks/use-genres";
+
 import { useArtists } from "../hooks/use-artists";
+import { useGenres } from "../hooks/use-genres";
+import { ComponentTrackFilters } from "../types"; 
 
 
 interface TrackFiltersProps {

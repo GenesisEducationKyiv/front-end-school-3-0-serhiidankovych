@@ -1,25 +1,38 @@
 "use client";
 import { AlertCircle, CopyX, Loader2, Plus, Trash2 } from "lucide-react";
+import dynamic from 'next/dynamic';
 import { useMemo, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
-import { AudioPlayer } from "@/features/tracks/components/audio-player";
-import { DeleteTrackDialog } from "@/features/tracks/components/delete-track-dialog";
 import { TrackFilters } from "@/features/tracks/components/track-filters";
 import { TrackList } from "@/features/tracks/components/track-list";
-import { TrackModal } from "@/features/tracks/components/track-modal";
-import { UploadTrackModal } from "@/features/tracks/components/upload-track-modal";
+
+const AudioPlayer = dynamic(() => 
+  import('@/features/tracks/components/audio-player').then(mod => mod.AudioPlayer),
+);
+
+const TrackModal = dynamic(() =>
+  import('@/features/tracks/components/track-modal').then(mod => mod.TrackModal)
+);
+const DeleteTrackDialog = dynamic(() =>
+  import('@/features/tracks/components/delete-track-dialog').then(mod => mod.DeleteTrackDialog)
+);
+const UploadTrackModal = dynamic(() =>
+  import('@/features/tracks/components/upload-track-modal').then(mod => mod.UploadTrackModal)
+);
 
 import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query'
-import { Track } from "@/features/tracks/schemas/schemas";
-import { ITEMS_PER_PAGE, useTracksQuery } from "@/features/tracks/hooks/use-tracks";
-import { ComponentTrackFilters } from "@/features/tracks/types";
 import React from "react";
-import { useAudioPlayerStore } from "@/features/tracks/store/use-audio-player-store";
+
 import ActiveTrackDisplay from "@/features/tracks/components/active-track";
+import { ITEMS_PER_PAGE, useTracksQuery } from "@/features/tracks/hooks/use-tracks";
+import { Track } from "@/features/tracks/schemas/schemas";
+import { useAudioPlayerStore } from "@/features/tracks/store/use-audio-player-store";
+import { ComponentTrackFilters } from "@/features/tracks/types";
 
 const queryClient = new QueryClient({
 });

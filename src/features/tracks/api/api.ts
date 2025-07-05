@@ -1,30 +1,24 @@
 import { A, D, G, O, pipe } from "@mobily/ts-belt";
 import axios, { AxiosError, AxiosResponse } from "axios";
+import { Sink } from "graphql-ws";
 import { z } from "zod";
+
+import apiClient from "../lib/base-api-client";
+import graphqlClient from "../lib/graphql-client";
 import {
+  MultipleDeleteResponse,
   MultipleDeleteResponseSchema,
+  PaginatedTrackResponse,
   PaginatedTrackResponseSchema,
+  SingleDeleteResponse,
   SingleDeleteResponseSchema,
+  Track,
   TrackFormData,
   TrackSchema,
-  PaginatedTrackResponse,
-  Track,
-  MultipleDeleteResponse,
-  SingleDeleteResponse,
 } from "../schemas/schemas";
 import { TrackFilters } from "../types";
 
-import graphqlClient from "../lib/graphql-client";
-import { Sink } from "graphql-ws";
-
-const SERVER_BASE_URL = "http://localhost:8000";
-const API_BASE_URL = `${SERVER_BASE_URL}/api`;
-const STATIC_FILES_PREFIX = "/api/files/";
-
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: { "Content-Type": "application/json" },
-});
+const FILES_URL = process.env.NEXT_PUBLIC_FILES_URL!;
 
 export interface ApiError {
   error: string;
@@ -164,12 +158,7 @@ export const api = {
   getTrackAudioUrl(audioFileName: string | null): O.Option<string> {
     return pipe(
       O.fromNullable(audioFileName),
-      O.map(
-        (fileName) =>
-          `${SERVER_BASE_URL}${STATIC_FILES_PREFIX}${encodeURIComponent(
-            fileName
-          )}`
-      )
+      O.map((fileName) => `${FILES_URL}${encodeURIComponent(fileName)}`)
     );
   },
 
@@ -184,7 +173,6 @@ export const api = {
     }> = {
       next: (result) => {
         const trackName = result.data?.activeTrackChanged ?? null;
-        console.log(result.data);
         onData(trackName);
       },
       error: (err) => {
