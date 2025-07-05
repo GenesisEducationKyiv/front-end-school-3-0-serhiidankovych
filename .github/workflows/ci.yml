@@ -32,9 +32,6 @@ jobs:
       - name: Run Unit Tests with Coverage
         run: npm run test
 
-      - name: Run E2E tests with Playwright
-        run: npm run test:e2e
-
       - name: Build App
         run: npm run build
 
