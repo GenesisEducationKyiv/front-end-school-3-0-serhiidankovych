@@ -43,6 +43,10 @@ export default [
       "unicorn/no-array-for-each": "off",
       "unicorn/no-array-reduce": "off",
       "unicorn/prevent-abbreviations": "off",
+
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-unused-expressions": "off",
+      "react-hooks/exhaustive-deps": "off",
     },
   },
 ];
