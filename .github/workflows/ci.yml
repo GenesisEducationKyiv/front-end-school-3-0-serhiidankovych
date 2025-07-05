@@ -27,7 +27,7 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Run Unit Tests with Coverage
-        run: npm run test -- --ci --coverage
+        run: npm run test
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
