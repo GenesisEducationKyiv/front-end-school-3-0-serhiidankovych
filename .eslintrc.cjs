@@ -38,7 +38,6 @@ module.exports = {
         "plugin:prettier/recommended",
         "plugin:testing-library/react",
         "plugin:jest-dom/recommended",
-        "plugin:tailwindcss/recommended",
         "plugin:vitest/legacy-recommended",
       ],
       rules: {
@@ -100,7 +99,6 @@ module.exports = {
         "@typescript-eslint/explicit-module-boundary-types": ["off"],
         "@typescript-eslint/no-empty-function": ["off"],
         "@typescript-eslint/no-explicit-any": ["off"],
-        "prettier/prettier": ["error", {}, { usePrettierrc: true }],
       },
     },
     {
