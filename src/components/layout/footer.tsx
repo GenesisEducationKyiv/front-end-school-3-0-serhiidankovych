@@ -18,15 +18,20 @@ export function Footer() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Link href="https://github.com/serhiidankovych" target="_blank">
+          <Link
+            href="https://github.com/serhiidankovych"
+            aria-label="GitHub profile"
+            target="_blank"
+          >
             <Github className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
           </Link>
 
-          <Link href="mailto:serhiidankovych@gmail.com">
+          <Link href="mailto:serhiidankovych@gmail.com" aria-label="Email">
             <Mail className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
           </Link>
           <Link
             href="https://www.linkedin.com/in/serhii-dankovych-706642255/"
+            aria-label="LinkedIn profile"
             target="_blank"
           >
             <Linkedin className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
