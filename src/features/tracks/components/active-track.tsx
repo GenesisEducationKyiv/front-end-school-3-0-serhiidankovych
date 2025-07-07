@@ -1,6 +1,5 @@
-'use client';
-
-import { useEffect, useState } from 'react';
+"use client";
+import { useEffect, useState } from "react";
 
 import {
   Card,
@@ -8,23 +7,37 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'; 
+} from "@/components/ui/card";
 
-import { api } from "../api/api"
+import { api } from "../api/api";
 
 export default function ActiveTrackDisplay() {
-  const [activeTrack, setActiveTrack] = useState<string | null>('Connecting...');
+  const [activeTrack, setActiveTrack] = useState<string | null>(
+    "Connecting..."
+  );
 
   useEffect(() => {
-    
     const unsubscribe = api.subscribeToActiveTrack((newTrackName) => {
       setActiveTrack(newTrackName);
     });
 
-    return () => {
+    const handleBeforeUnload = () => {
       unsubscribe();
     };
-  }, []); 
+
+    const handlePageHide = () => {
+      unsubscribe();
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("pagehide", handlePageHide);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("pagehide", handlePageHide);
+      unsubscribe();
+    };
+  }, []);
 
   return (
     <Card className="w-full max-w-md mt-5">
@@ -42,9 +55,11 @@ export default function ActiveTrackDisplay() {
       </CardHeader>
       <CardContent>
         <div className="text-sm">
-          <span className="font-semibold text-muted-foreground">Now Playing: </span>
+          <span className="font-semibold text-muted-foreground">
+            Now Playing:{" "}
+          </span>
           <span className="font-medium text-card-foreground">
-            {activeTrack || 'No track is active'}
+            {activeTrack || "No track is active"}
           </span>
         </div>
       </CardContent>
