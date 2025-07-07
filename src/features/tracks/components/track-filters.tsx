@@ -134,7 +134,10 @@ export const TrackFilters = memo(function TrackFilters({
             onValueChange={handleGenreChange}
             disabled={isLoadingGenres || genres.length === 0}
           >
-            <SelectTrigger className="h-9 w-32 bg-background/50 border-border/60 hover:border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+            <SelectTrigger
+              aria-label={`Genre: ${filters.genre || "All Genres"}`}
+              className="h-9 w-32 bg-background/50 border-border/60 hover:border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <SelectValue
                 placeholder={
                   isLoadingGenres ? (
@@ -158,7 +161,16 @@ export const TrackFilters = memo(function TrackFilters({
           </Select>
 
           <Select value={currentSortValue} onValueChange={handleSortChange}>
-            <SelectTrigger className="h-9 w-40 bg-background/50 border-border/60 hover:border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200">
+            <SelectTrigger
+              aria-label={`Sorting: ${
+                SORT_OPTIONS.find(
+                  (opt) =>
+                    opt.field === filters.sort &&
+                    opt.direction === filters.order
+                )?.label || "Default Order"
+              }`}
+              className="h-9 w-40 bg-background/50 border-border/60 hover:border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200"
+            >
               <SelectValue placeholder="Choose sorting" />
             </SelectTrigger>
             <SelectContent className="bg-popover/95 backdrop-blur-sm border-border/50">
@@ -191,6 +203,7 @@ export const TrackFilters = memo(function TrackFilters({
               onClick={handleClearFilters}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-destructive bg-muted/50 hover:bg-destructive/10 border border-border/50 rounded-md transition-all duration-200 hover:border-destructive/20"
               data-testid="clear-filters"
+              aria-label="Clear filters"
             >
               <X className="h-3 w-3" />
               Clear
