@@ -41,11 +41,13 @@ export default function ActiveTrackDisplay() {
       </span>
       <span className="flex-shrink-0 text-muted-foreground">Now Playing:</span>
       <div
-        className="flex h-full max-w-[160px] items-center truncate font-medium"
+        className="flex h-full min-w-[160px] max-w-[160px] items-center truncate font-medium"
         aria-live="polite"
       >
         {isLoading ? (
-          <Skeleton className="h-5 w-full" />
+          <span className="inline-block w-full truncate">
+            <Skeleton className="inline-block h-5 w-[160px] align-middle" />
+          </span>
         ) : (
           <span className="inline-block w-full truncate">
             {activeTrack || "No track active"}
