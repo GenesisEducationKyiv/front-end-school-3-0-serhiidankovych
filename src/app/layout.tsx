@@ -28,7 +28,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${iBMPlexSans.variable}  antialiased dark`}>
         <Header />
-        <main className="flex-grow">{children}</main>
+        {children}
         <Toaster data-testid="toast-container" />
         <Footer />
       </body>

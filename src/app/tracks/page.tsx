@@ -134,7 +134,7 @@ function TracksPageContent() {
   };
 
   return (
-    <div className="container mx-auto max-w-6xl p-4 sm:p-8">
+    <div className="container mx-auto max-w-6xl p-4 sm:p-8 min-h-screen">
       <div className="mb-6 flex items-center justify-between gap-4">
         <h1 className="text-3xl font-bold" data-testid="tracks-header">
           Tracks
