@@ -1,4 +1,5 @@
 import { create } from "zustand";
+
 import { Track } from "../schemas/schemas";
 
 interface AudioPlayerState {
