@@ -1,6 +1,6 @@
 
 
-import { Music, Edit, Upload, Trash2, List } from "lucide-react";
+import { Edit, List,Music, Trash2, Upload } from "lucide-react";
 import { JSX } from "react";
 
 type Feature = {
