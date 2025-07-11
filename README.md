@@ -109,3 +109,7 @@ const UploadTrackModal = dynamic(() =>
 * Reduced `/tracks` route size by **35 kB**
 * Reduced first load JS by **45 kB**
 * Improved performance and time to interactive for users visiting the `/tracks` route
+
+## ⚡ Performance Deep Dive
+  ![image](https://github.com/user-attachments/assets/cef34987-2d0c-4acf-ad3a-58df06852a4c)
+

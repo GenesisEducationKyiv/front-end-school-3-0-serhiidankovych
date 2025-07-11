@@ -21,7 +21,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useGenres } from "../hooks/use-genres";
 import { TrackFormData, TrackFormSchema } from "../schemas/schemas";
 
-
 interface TrackFormProps {
   initialData?: Partial<TrackFormData>;
   onSubmit: (data: TrackFormData) => void;
@@ -47,10 +46,12 @@ export function TrackForm({
     mode: "onChange",
   });
 
-  const [selectedGenres, setSelectedGenres] = useState<string[]>(initialData.genres || []);
-  const [imageStatus, setImageStatus] = useState<"idle" | "verifying" | "verified" | "error">(
-    "idle"
+  const [selectedGenres, setSelectedGenres] = useState<string[]>(
+    initialData.genres || []
   );
+  const [imageStatus, setImageStatus] = useState<
+    "idle" | "verifying" | "verified" | "error"
+  >("idle");
   const [showPreview, setShowPreview] = useState(false);
 
   const {
@@ -60,11 +61,12 @@ export function TrackForm({
     error: genresError,
     refetch: refetchGenres,
   } = useGenres();
-  
+
   const coverImageUrl = form.watch("coverImage");
 
   useEffect(() => {
-    const hasInitialImage = !!initialData?.coverImage && initialData.coverImage === coverImageUrl;
+    const hasInitialImage =
+      !!initialData?.coverImage && initialData.coverImage === coverImageUrl;
     if (hasInitialImage) {
       setImageStatus("verified");
       setShowPreview(true);
@@ -76,11 +78,22 @@ export function TrackForm({
     return new Promise((resolve) => {
       const img = new window.Image();
       const timeoutId = setTimeout(() => {
-        img.onload = null; img.onerror = null; img.src = ""; resolve(false);
+        img.onload = null;
+        img.onerror = null;
+        img.src = "";
+        resolve(false);
       }, 5000);
-      img.onload = () => { clearTimeout(timeoutId); resolve(true); };
-      img.onerror = () => { clearTimeout(timeoutId); resolve(false); };
-      img.src = url.includes("?") ? `${url}&_cb=${Date.now()}` : `${url}?cb=${Date.now()}`;
+      img.onload = () => {
+        clearTimeout(timeoutId);
+        resolve(true);
+      };
+      img.onerror = () => {
+        clearTimeout(timeoutId);
+        resolve(false);
+      };
+      img.src = url.includes("?")
+        ? `${url}&_cb=${Date.now()}`
+        : `${url}?cb=${Date.now()}`;
     });
   }, []);
 
@@ -124,8 +137,10 @@ export function TrackForm({
     setImageStatus("idle");
     form.clearErrors("coverImage");
   };
-  
-  const filteredGenres = availableGenres.filter((g) => !selectedGenres.includes(g));
+
+  const filteredGenres = availableGenres.filter(
+    (g) => !selectedGenres.includes(g)
+  );
 
   const toggleGenre = (genre: string) => {
     const newGenres = selectedGenres.includes(genre)
@@ -143,7 +158,12 @@ export function TrackForm({
 
   return (
     <Form {...form}>
-      <form id={id} data-testid="track-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form
+        id={id}
+        data-testid="track-form"
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-6"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-1">
           <div className="space-y-4">
             <FormField
@@ -151,9 +171,16 @@ export function TrackForm({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Track Title<span className="text-destructive">*</span></FormLabel>
+                  <FormLabel>
+                    Track Title<span className="text-destructive">*</span>
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter track title" {...field} disabled={isSubmitting} data-testid="input-title" />
+                    <Input
+                      placeholder="Enter track title"
+                      {...field}
+                      disabled={isSubmitting}
+                      data-testid="input-title"
+                    />
                   </FormControl>
                   <FormMessage data-testid="error-title" />
                 </FormItem>
@@ -164,9 +191,16 @@ export function TrackForm({
               name="artist"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Artist<span className="text-destructive">*</span></FormLabel>
+                  <FormLabel>
+                    Artist<span className="text-destructive">*</span>
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter artist name" {...field} disabled={isSubmitting} data-testid="input-artist" />
+                    <Input
+                      placeholder="Enter artist name"
+                      {...field}
+                      disabled={isSubmitting}
+                      data-testid="input-artist"
+                    />
                   </FormControl>
                   <FormMessage data-testid="error-artist" />
                 </FormItem>
@@ -179,7 +213,12 @@ export function TrackForm({
                 <FormItem>
                   <FormLabel>Album</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter album name (optional)" {...field} disabled={isSubmitting} data-testid="input-album" />
+                    <Input
+                      placeholder="Enter album name (optional)"
+                      {...field}
+                      disabled={isSubmitting}
+                      data-testid="input-album"
+                    />
                   </FormControl>
                   <FormMessage data-testid="error-album" />
                 </FormItem>
@@ -210,32 +249,104 @@ export function TrackForm({
                         }}
                       />
                     </FormControl>
-                    <Button type="button" variant="outline" size="icon" onClick={handleVerifyImage} disabled={!field.value || isSubmitting || imageStatus === 'verifying'} aria-label="Verify Image URL" data-testid="verify-url-button" className={imageStatus === "verified" ? "border-green-500" : ""}>
-                      {imageStatus === "verifying" ? <Loader2 className="h-4 w-4 animate-spin" /> : imageStatus === "verified" ? <CheckCircle className="h-4 w-4 text-green-500" /> : <CheckCircle className="h-4 w-4 text-muted-foreground" />}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={handleVerifyImage}
+                      disabled={
+                        !field.value ||
+                        isSubmitting ||
+                        imageStatus === "verifying"
+                      }
+                      aria-label="Verify Image URL"
+                      data-testid="verify-url-button"
+                      className={
+                        imageStatus === "verified" ? "border-green-500" : ""
+                      }
+                    >
+                      {imageStatus === "verifying" ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : imageStatus === "verified" ? (
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                      )}
                     </Button>
                   </div>
                   <div className="h-5 mt-1">
-                    {imageStatus === "verifying" && (<p className="text-xs text-muted-foreground flex items-center"><Loader2 className="h-3 w-3 mr-1 animate-spin" />Verifying image URL...</p>)}
-                    {imageStatus === "verified" && (<p className="text-xs text-green-600 flex items-center"><CheckCircle className="h-3 w-3 mr-1" />Image URL verified successfully</p>)}
-                    {imageStatus === "error" && (<p className="text-xs text-destructive flex items-center"><AlertCircle className="h-3 w-3 mr-1" />{form.formState.errors.coverImage?.message || "Could not load image."}</p>)}
+                    {imageStatus === "verifying" && (
+                      <p className="text-xs text-muted-foreground flex items-center">
+                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                        Verifying image URL...
+                      </p>
+                    )}
+                    {imageStatus === "verified" && (
+                      <p className="text-xs text-green-600 flex items-center">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Image URL verified successfully
+                      </p>
+                    )}
+                    {imageStatus === "error" && (
+                      <p className="text-xs text-destructive flex items-center">
+                        <AlertCircle className="h-3 w-3 mr-1" />
+                        {form.formState.errors.coverImage?.message ||
+                          "Could not load image."}
+                      </p>
+                    )}
                   </div>
-                  <FormDescription className="text-xs pt-1">Enter a valid image URL (JPG, PNG, GIF, etc.) and click to verify</FormDescription>
-                  {imageStatus !== 'error' && <FormMessage data-testid="error-cover-image" />}
+                  <FormDescription className="text-xs pt-1">
+                    Enter a valid image URL (JPG, PNG, GIF, etc.) and click to
+                    verify
+                  </FormDescription>
+                  {imageStatus !== "error" && (
+                    <FormMessage data-testid="error-cover-image" />
+                  )}
                   <div className="mt-3 flex items-center justify-center bg-accent p-4 min-h-[120px] border-dashed border-2 border-border rounded-md">
-                    {showPreview && imageStatus === 'verified' ? (
+                    {showPreview && imageStatus === "verified" ? (
                       <div className="relative group">
                         <div className="rounded border border-muted shadow-sm overflow-hidden">
-                          <Image src={coverImageUrl!} alt="Cover preview" width={100} height={100} className="object-cover transition-all" onError={() => { setImageStatus("error"); setShowPreview(false); form.setError("coverImage", { type: "manual", message: "Failed to load image preview." }); }} unoptimized />
+                          <Image
+                            src={coverImageUrl!}
+                            alt="Cover preview"
+                            width={100}
+                            height={100}
+                            loading="lazy"
+                            className="object-cover transition-all"
+                            onError={() => {
+                              setImageStatus("error");
+                              setShowPreview(false);
+                              form.setError("coverImage", {
+                                type: "manual",
+                                message: "Failed to load image preview.",
+                              });
+                            }}
+                          />
                         </div>
                         <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded">
-                          <Button type="button" size="icon" variant="destructive" className="h-7 w-7" onClick={handleClearImage} aria-label="Clear image URL"><X className="h-4 w-4" /></Button>
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="destructive"
+                            className="h-7 w-7"
+                            onClick={handleClearImage}
+                            aria-label="Clear image URL"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
                     ) : (
                       <div className="w-24 h-24 rounded-md flex flex-col items-center justify-center text-muted-foreground text-center">
                         <FileImage className="h-10 w-10 mb-1" />
                         <span className="text-xs leading-tight">
-                          {imageStatus === 'error' ? "Invalid image URL" : imageStatus === 'verifying' ? "Verifying..." : imageStatus === 'idle' && coverImageUrl ? "Verification needed" : "No image preview"}
+                          {imageStatus === "error"
+                            ? "Invalid image URL"
+                            : imageStatus === "verifying"
+                              ? "Verifying..."
+                              : imageStatus === "idle" && coverImageUrl
+                                ? "Verification needed"
+                                : "No image preview"}
                         </span>
                       </div>
                     )}
@@ -251,15 +362,32 @@ export function TrackForm({
           name="genres"
           render={() => (
             <FormItem>
-              <FormLabel>Genres<span className="text-destructive">*</span></FormLabel>
+              <FormLabel>
+                Genres<span className="text-destructive">*</span>
+              </FormLabel>
               {selectedGenres.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">Selected Genres:</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Selected Genres:
+                  </p>
                   <div className="flex flex-wrap gap-2 p-2 border rounded-md">
                     {selectedGenres.map((genre) => (
-                      <Badge key={genre} variant="secondary" className="px-3 py-1 text-sm flex items-center gap-1.5 rounded-full">
+                      <Badge
+                        key={genre}
+                        variant="secondary"
+                        className="px-3 py-1 text-sm flex items-center gap-1.5 rounded-full"
+                      >
                         {genre}
-                        <Button type="button" variant="ghost" size="icon" className="h-4 w-4 rounded-full hover:bg-background" onClick={() => handleRemoveGenre(genre)} aria-label={`Remove ${genre} genre`}><X className="h-3 w-3" /></Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-4 w-4 rounded-full hover:bg-background"
+                          onClick={() => handleRemoveGenre(genre)}
+                          aria-label={`Remove ${genre} genre`}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
                       </Badge>
                     ))}
                   </div>
@@ -267,26 +395,61 @@ export function TrackForm({
               )}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-medium text-muted-foreground">Available Genres:</p>
-                  {isErrorGenres && (<Button type="button" variant="ghost" size="sm" onClick={() => refetchGenres()} className="text-xs">Retry</Button>)}
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Available Genres:
+                  </p>
+                  {isErrorGenres && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => refetchGenres()}
+                      className="text-xs"
+                    >
+                      Retry
+                    </Button>
+                  )}
                 </div>
-                {isLoadingGenres && (<div className="flex items-center text-sm text-muted-foreground py-2"><Loader2 className="mr-2 h-4 w-4 animate-spin" />Loading genres...</div>)}
-                {isErrorGenres && (<div className="text-sm text-destructive py-2 px-1 flex items-center"><AlertCircle className="mr-2 h-4 w-4" />Failed to load genres: {genresError?.message}</div>)}
-                {!isLoadingGenres && !isErrorGenres && (
-                  filteredGenres.length > 0 ? (
+                {isLoadingGenres && (
+                  <div className="flex items-center text-sm text-muted-foreground py-2">
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Loading genres...
+                  </div>
+                )}
+                {isErrorGenres && (
+                  <div className="text-sm text-destructive py-2 px-1 flex items-center">
+                    <AlertCircle className="mr-2 h-4 w-4" />
+                    Failed to load genres: {genresError?.message}
+                  </div>
+                )}
+                {!isLoadingGenres &&
+                  !isErrorGenres &&
+                  (filteredGenres.length > 0 ? (
                     <ScrollArea className="h-24 w-full rounded-md border">
                       <div className="flex flex-wrap gap-1.5 p-3">
                         {filteredGenres.map((genre) => (
-                          <Badge key={genre} variant="outline" className="px-2.5 py-0.5 text-xs cursor-pointer hover:bg-accent transition-colors rounded-full" onClick={() => toggleGenre(genre)}>{genre}</Badge>
+                          <Badge
+                            key={genre}
+                            variant="outline"
+                            className="px-2.5 py-0.5 text-xs cursor-pointer hover:bg-accent transition-colors rounded-full"
+                            onClick={() => toggleGenre(genre)}
+                          >
+                            {genre}
+                          </Badge>
                         ))}
                       </div>
                     </ScrollArea>
                   ) : (
-                    <p className="text-sm text-muted-foreground py-2 px-1">{selectedGenres.length > 0 ? "All available genres have been selected" : "No genres available"}</p>
-                  )
-                )}
+                    <p className="text-sm text-muted-foreground py-2 px-1">
+                      {selectedGenres.length > 0
+                        ? "All available genres have been selected"
+                        : "No genres available"}
+                    </p>
+                  ))}
               </div>
-              <FormDescription>Select at least one genre for your track</FormDescription>
+              <FormDescription>
+                Select at least one genre for your track
+              </FormDescription>
               <FormMessage data-testid="error-genres" />
             </FormItem>
           )}
@@ -295,4 +458,3 @@ export function TrackForm({
     </Form>
   );
 }
-
