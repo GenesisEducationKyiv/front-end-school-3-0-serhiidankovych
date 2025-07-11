@@ -3,7 +3,7 @@
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -39,8 +39,8 @@ export function Header() {
               <Image
                 src="/hive-logo.png"
                 alt="Music Hive Logo"
-                width={40}
-                height={40}
+                width={33}
+                height={33}
                 className="transition-transform group-hover:scale-110"
                 priority
               />

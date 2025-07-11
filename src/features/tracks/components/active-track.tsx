@@ -1,53 +1,32 @@
-'use client';
+"use client";
+import { Skeleton } from "@/components/ui/skeleton";
 
-import { useEffect, useState } from 'react';
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'; 
-
-import { api } from "../api/api"
+import { useActiveTrack } from "../hooks/use-active-track";
 
 export default function ActiveTrackDisplay() {
-  const [activeTrack, setActiveTrack] = useState<string | null>('Connecting...');
-
-  useEffect(() => {
-    
-    const unsubscribe = api.subscribeToActiveTrack((newTrackName) => {
-      setActiveTrack(newTrackName);
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, []); 
+  const { activeTrack, isLoading } = useActiveTrack();
 
   return (
-    <Card className="w-full max-w-md mt-5">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <span className="relative flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+    <div className="flex h-6 w-[200px] items-center gap-2 text-sm">
+      <span className="relative flex h-2 w-2 flex-shrink-0">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+      </span>
+      <span className="flex-shrink-0 text-muted-foreground">Now Playing:</span>
+      <div
+        className="flex h-full min-w-[160px] max-w-[160px] items-center truncate font-medium"
+        aria-live="polite"
+      >
+        {isLoading ? (
+          <span className="inline-block w-full truncate">
+            <Skeleton className="inline-block h-5 w-[160px] align-middle" />
           </span>
-          Live Active Track
-        </CardTitle>
-        <CardDescription>
-          This updates in real-time via Subscriptions.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="text-sm">
-          <span className="font-semibold text-muted-foreground">Now Playing: </span>
-          <span className="font-medium text-card-foreground">
-            {activeTrack || 'No track is active'}
+        ) : (
+          <span className="inline-block w-full truncate">
+            {activeTrack || "No track active"}
           </span>
-        </div>
-      </CardContent>
-    </Card>
+        )}
+      </div>
+    </div>
   );
 }
