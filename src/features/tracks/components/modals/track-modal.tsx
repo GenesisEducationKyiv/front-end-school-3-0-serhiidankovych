@@ -1,6 +1,5 @@
 "use client";
 import { AlertCircle, Loader2, Pencil, PlusCircle } from "lucide-react";
-import { toast } from "sonner";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -16,8 +15,8 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Track, TrackFormData } from "@/features/tracks/schemas/schemas";
 
-import { useSaveTrack } from "../hooks/use-save-track";
-import { TrackForm } from "./track-form";
+import { useSaveTrack } from "../../hooks/use-save-track";
+import { TrackForm } from "../ui/track-form";
 
 interface TrackModalProps {
   isOpen: boolean;
@@ -34,11 +33,10 @@ export function TrackModal({
   onSuccess: parentOnSuccess,
   mode,
 }: TrackModalProps) {
-  
   const saveTrackMutation = useSaveTrack();
-  
+
   const isSubmitting = saveTrackMutation.isPending;
-  const error = saveTrackMutation.error?.message; 
+  const error = saveTrackMutation.error?.message;
   const isEditMode = mode === "edit";
   const formId = isEditMode ? "edit-track-form" : "create-track-form";
 
@@ -51,7 +49,7 @@ export function TrackModal({
       {
         onSuccess: (processedTrack) => {
           parentOnSuccess(processedTrack);
-          
+
           if (!isEditMode) {
             onClose();
           }
@@ -59,7 +57,7 @@ export function TrackModal({
       }
     );
   };
-  
+
   const handleInteractOutside = (event: Event) => {
     if (isSubmitting) {
       event.preventDefault();
@@ -72,7 +70,7 @@ export function TrackModal({
       onClose();
     }
   };
-  
+
   if (isEditMode && !track && isOpen) {
     return null;
   }
@@ -81,20 +79,22 @@ export function TrackModal({
     ? track
     : { title: "", artist: "", album: "", genres: [], coverImage: "" };
 
-  const icon = isEditMode 
-    ? <Pencil className="h-5 w-5 text-muted-foreground" /> 
-    : <PlusCircle className="h-5 w-5 text-muted-foreground" />;
+  const icon = isEditMode ? (
+    <Pencil className="h-5 w-5 text-muted-foreground" />
+  ) : (
+    <PlusCircle className="h-5 w-5 text-muted-foreground" />
+  );
 
   const title = isEditMode ? "Edit Track Details" : "Create New Track";
-  const description = isEditMode 
-    ? `Make changes to ${track?.title || "this track"}.` 
+  const description = isEditMode
+    ? `Make changes to ${track?.title || "this track"}.`
     : "Add a new track to your collection";
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent 
-        className="sm:max-w-3xl h-[90vh] flex flex-col p-0" 
-        onInteractOutside={handleInteractOutside} 
+      <DialogContent
+        className="sm:max-w-3xl h-[90vh] flex flex-col p-0"
+        onInteractOutside={handleInteractOutside}
         onEscapeKeyDown={handleInteractOutside}
       >
         <DialogHeader className="px-6 pt-6 pb-4 flex-shrink-0">
@@ -117,24 +117,22 @@ export function TrackModal({
           </Alert>
         )}
 
-       
         <ScrollArea className="h-[450px] px-6">
           <div className="pb-4">
-            <TrackForm 
-              id={formId} 
-              initialData={initialData as Partial<TrackFormData>} 
-              onSubmit={handleSubmit} 
-              isSubmitting={isSubmitting} 
+            <TrackForm
+              id={formId}
+              initialData={initialData as Partial<TrackFormData>}
+              onSubmit={handleSubmit}
+              isSubmitting={isSubmitting}
             />
           </div>
         </ScrollArea>
 
         <DialogFooter className="px-6 pb-6 pt-4 border-t flex-shrink-0 sm:justify-between">
           <div className="text-xs text-muted-foreground hidden sm:block">
-            {isEditMode && track?.updatedAt 
-              ? `Last updated: ${new Date(track.updatedAt).toLocaleString()}` 
-              : ""
-            }
+            {isEditMode && track?.updatedAt
+              ? `Last updated: ${new Date(track.updatedAt).toLocaleString()}`
+              : ""}
           </div>
           <div className="flex space-x-2">
             <DialogClose asChild>
@@ -142,19 +140,20 @@ export function TrackModal({
                 Cancel
               </Button>
             </DialogClose>
-            <Button 
-              type="submit" 
-              form={formId} 
-              disabled={isSubmitting} 
+            <Button
+              type="submit"
+              form={formId}
+              disabled={isSubmitting}
               data-testid="submit-button"
             >
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isSubmitting 
-                ? "Saving..." 
-                : isEditMode 
-                  ? "Save Changes" 
-                  : "Create Track"
-              }
+              {isSubmitting && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              {isSubmitting
+                ? "Saving..."
+                : isEditMode
+                  ? "Save Changes"
+                  : "Create Track"}
             </Button>
           </div>
         </DialogFooter>

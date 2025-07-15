@@ -1,5 +1,4 @@
 "use client";
-
 import { useQuery } from "@tanstack/react-query";
 
 import { useDebounce } from "@/hooks/use-debounce";
@@ -27,7 +26,6 @@ export function useTracksQuery({ filters, currentPage }: UseTracksQueryProps) {
 
   return useQuery<PaginatedTrackResponse, ApiError>({
     queryKey: ["tracks", queryParams],
-
     queryFn: () => api.getTracks(queryParams),
   });
 }
