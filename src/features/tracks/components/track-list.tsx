@@ -115,6 +115,7 @@ const TrackCoverImage = ({ track }: { track: Track }) => (
         src={track.coverImage}
         alt={`${track.title} cover`}
         fill
+        loading="lazy"
         className="object-cover"
         sizes="40px"
       />

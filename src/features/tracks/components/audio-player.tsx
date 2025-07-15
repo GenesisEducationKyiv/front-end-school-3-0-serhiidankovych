@@ -147,7 +147,7 @@ export function AudioPlayer({
                 src={track.coverImage}
                 alt={track.title}
                 fill
-                unoptimized
+                loading="lazy"
                 className="object-cover"
               />
             ) : (
