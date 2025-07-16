@@ -1,43 +1,16 @@
 "use client";
-import { useEffect, useState } from "react";
-
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { api } from "../api/api";
+import { useActiveTrack } from "../hooks/use-active-track";
 
 export default function ActiveTrackDisplay() {
-  const [activeTrack, setActiveTrack] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = api.subscribeToActiveTrack((newTrackName) => {
-      setActiveTrack(newTrackName);
-      setIsLoading(false);
-    });
-
-    const handleBeforeUnload = () => {
-      unsubscribe();
-    };
-
-    const handlePageHide = () => {
-      unsubscribe();
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    window.addEventListener("pagehide", handlePageHide);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      window.removeEventListener("pagehide", handlePageHide);
-      unsubscribe();
-    };
-  }, []);
+  const { activeTrack, isLoading } = useActiveTrack();
 
   return (
     <div className="flex h-6 w-[200px] items-center gap-2 text-sm">
       <span className="relative flex h-2 w-2 flex-shrink-0">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-        <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
       </span>
       <span className="flex-shrink-0 text-muted-foreground">Now Playing:</span>
       <div

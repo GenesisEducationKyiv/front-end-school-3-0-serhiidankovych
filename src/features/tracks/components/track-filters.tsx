@@ -1,6 +1,5 @@
-import { D } from "@mobily/ts-belt";
 import { ArrowDown, ArrowUp, Loader2, Search, Shuffle, X } from "lucide-react";
-import { memo, useCallback, useMemo } from "react";
+import { memo } from "react";
 
 import { Input } from "@/components/ui/input";
 import {
@@ -12,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { useGenres } from "../hooks/use-genres";
+import { useTrackFilters } from "../hooks/use-track-filters";
 import { ComponentTrackFilters } from "../types";
 
 interface TrackFiltersProps {
@@ -20,98 +19,21 @@ interface TrackFiltersProps {
   updateFilters: (filters: Partial<ComponentTrackFilters>) => void;
 }
 
-const isValidSortField = (
-  field: string
-): field is ComponentTrackFilters["sort"] => {
-  return ["title", "artist", "createdAt"].includes(field);
-};
-
-const isValidSortOrder = (
-  order: string
-): order is ComponentTrackFilters["order"] => {
-  return ["asc", "desc"].includes(order);
-};
-
-const SORT_OPTIONS = [
-  { field: "title", direction: "asc", label: "Title (A-Z)" },
-  { field: "title", direction: "desc", label: "Title (Z-A)" },
-  { field: "artist", direction: "asc", label: "Artist (A-Z)" },
-  { field: "artist", direction: "desc", label: "Artist (Z-A)" },
-  { field: "createdAt", direction: "desc", label: "Newest First" },
-  { field: "createdAt", direction: "asc", label: "Oldest First" },
-] as const;
-
 export const TrackFilters = memo(function TrackFilters({
   filters,
   updateFilters,
 }: TrackFiltersProps) {
-  const { data: genres = [], isLoading: isLoadingGenres } = useGenres();
-
-  const hasActiveFilters = useMemo(
-    () => D.values(filters).some((v) => v !== undefined && v !== ""),
-    [filters]
-  );
-
-  const currentSortValue = useMemo((): string => {
-    return filters.sort && filters.order
-      ? `${filters.sort}:${filters.order}`
-      : "default";
-  }, [filters.sort, filters.order]);
-
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      updateFilters({ search: e.target.value || undefined });
-    },
-    [updateFilters]
-  );
-
-  const handleGenreChange = useCallback(
-    (value: string) => {
-      updateFilters({ genre: value === "all" ? undefined : value });
-    },
-    [updateFilters]
-  );
-
-  const handleSortChange = useCallback(
-    (value: string) => {
-      if (value === "default") {
-        updateFilters({ sort: undefined, order: undefined });
-      } else {
-        const [field, direction] = value.split(":");
-        if (
-          field &&
-          direction &&
-          isValidSortField(field) &&
-          isValidSortOrder(direction)
-        ) {
-          updateFilters({ sort: field, order: direction });
-        } else {
-          updateFilters({ sort: undefined, order: undefined });
-        }
-      }
-    },
-    [updateFilters]
-  );
-
-  const handleClearFilters = useCallback(() => {
-    updateFilters({
-      search: undefined,
-      genre: undefined,
-      artist: undefined,
-      sort: undefined,
-      order: undefined,
-    });
-  }, [updateFilters]);
-
-  const genreOptions = useMemo(
-    () =>
-      genres.map((item) => (
-        <SelectItem key={item} value={item} className="text-xs">
-          {item}
-        </SelectItem>
-      )),
-    [genres]
-  );
+  const {
+    isLoadingGenres,
+    hasActiveFilters,
+    currentSortValue,
+    handleSearchChange,
+    handleGenreChange,
+    handleSortChange,
+    handleClearFilters,
+    genreOptions,
+    SORT_OPTIONS,
+  } = useTrackFilters(filters, updateFilters);
 
   return (
     <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-4 shadow-sm">
@@ -132,7 +54,7 @@ export const TrackFilters = memo(function TrackFilters({
           <Select
             value={filters.genre || "all"}
             onValueChange={handleGenreChange}
-            disabled={isLoadingGenres || genres.length === 0}
+            disabled={isLoadingGenres || genreOptions.length === 0}
           >
             <SelectTrigger
               aria-label={`Genre: ${filters.genre || "All Genres"}`}
@@ -155,8 +77,12 @@ export const TrackFilters = memo(function TrackFilters({
               <SelectItem value="all" className="font-medium text-xs">
                 All Genres
               </SelectItem>
-              {genres.length > 0 && <SelectSeparator />}
-              {genreOptions}
+              {genreOptions.length > 0 && <SelectSeparator />}
+              {genreOptions.map(({ label, value }) => (
+                <SelectItem key={value} value={value} className="text-xs">
+                  {label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
