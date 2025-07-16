@@ -1,8 +1,8 @@
 "use client";
 
-import { TrackListTable } from "@/features/tracks/components/track-list-table";
 import { TrackListError } from "@/features/tracks/components/ui/track-list-error";
 import { TrackListSkeleton } from "@/features/tracks/components/ui/track-list-skeleton";
+import { TrackListTable } from "@/features/tracks/components/ui/track-list-table";
 import { Track } from "@/features/tracks/schemas/schemas";
 
 interface TrackListProps {
