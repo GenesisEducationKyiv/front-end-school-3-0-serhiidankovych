@@ -1,14 +1,15 @@
 "use client";
-
 import dynamic from "next/dynamic";
 
 import { ClientProvider } from "@/app/providers/query-client-provider";
 import { useAudioPlayerStore } from "@/features/tracks/store/use-audio-player-store";
 
-const AudioPlayer = dynamic(() =>
-  import("@/features/tracks/components/ui/audio-player").then(
-    (mod) => mod.AudioPlayer
-  )
+const AudioPlayer = dynamic(
+  () =>
+    import("@/features/tracks/components/ui/audio-player").then(
+      (mod) => mod.AudioPlayer
+    ),
+  { ssr: false }
 );
 
 export default function TracksLayout({
@@ -23,7 +24,6 @@ export default function TracksLayout({
     <ClientProvider>
       <div className="relative min-h-screen">
         <main className={currentTrack ? "pb-24" : ""}>{children}</main>
-
         {currentTrack && (
           <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background shadow-lg">
             <AudioPlayer
