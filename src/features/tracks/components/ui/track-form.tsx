@@ -14,9 +14,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-import { useTrackForm } from "../hooks/use-track-form";
-import { TrackFormData } from "../schemas/schemas";
+import { useTrackForm } from "@/features/tracks/hooks/use-track-form";
+import { TrackFormData } from "@/features/tracks/schemas/schemas";
 
 interface TrackFormProps {
   initialData?: Partial<TrackFormData>;
@@ -204,9 +203,6 @@ export function TrackForm({
                             height={100}
                             loading="lazy"
                             className="object-cover transition-all"
-                            onError={() => {
-                              // Error handling is managed in the hook
-                            }}
                           />
                         </div>
                         <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded">

@@ -1,115 +1,43 @@
-# 🎵 Music Track Management App (Next.js)
+# 🎵 Music Track Management App (Next.js) [[LinkedIn Profile](https://www.linkedin.com/in/serhii-dankovych-706642255/)]
 
-A modern **Next.js** frontend for managing music tracks via a clean and interactive UI. This project supports full **CRUD operations**, **audio upload**, and **inline playback**, designed as a submission for the _Front-End School 3.0_ challenge. It emphasizes **modular architecture**, **clean code**, and **testability** with `data-testid` attributes.
-
----
-
-## 🖼️ App Gallery
-
-| Track List View | Track Form |
-|------------------|------------|
-| ![Track List](https://github.com/user-attachments/assets/aaab84f1-d9e4-4e17-a98a-302eb29cf4d1) | ![Track Form](https://github.com/user-attachments/assets/884d9529-3101-4087-bad4-4e3884afa461) |
-
----
-
-## ✅ Core Features
-
-### 🎼 Create a Track (Without Audio)
-
-- Modal form to input:
-- Optional cover image with format validation and fallback.
-- Save metadata independently of the audio file.
-
-### ✏️ Edit Track Metadata
-
-- Edit modal pre-filled with existing info.
-- Auto-updates the list on save.
-
-### 🎧 Upload Track Audio
-
-- Supports `.mp3` and `.wav` files.
-- File type & size validation.
-- Replace/remove existing audio files.
-
-### ❌ Delete a Track
-
-- Deletes from both frontend and backend.
-- Includes confirmation dialog.
-
-### 📜 Track List View
-
-- Paginated with sorting (title, artist, genre).
-- Filter by metadata with debounce-based search.
-- Inline audio playback - only one track plays at a time.
-
----
-
-## 🌟 Extra Features
-
-- Bulk delete multiple tracks at once.
-- Optimistic UI updates for faster UX.
-- Waveform visualization for currently playing track.
-
----
-
-## 🚀 Getting Started
-
-Install dependencies and run the development server:
-
-```bash
-npm install
-
-npm run dev
-# or
-yarn install && yarn dev
-# or
-pnpm install && pnpm dev
-# or
-bun install && bun dev
+A modern **Next.js** frontend for managing music tracks via a clean and interactive UI. This project supports full **CRUD operations**, **audio upload**, and **inline playback**, designed as a submission for the _Front-End School 3.0_ challenge. It emphasizes **feature based architecture**, **clean code**, and **testability** with `data-testid` attributes.
 
 
-Then open [http://localhost:3000](http://localhost:3000) in your browser.
-```
+![Music Track Management App](https://github.com/user-attachments/assets/247351f9-93ff-4975-9d59-a5d5b07c1cd1)
 
-## ⚙️ Building Setup and Bundle Optimization
 
-To improve performance and reduce the initial load time, we optimized the `/tracks` route by **lazy-loading** heavy libraries and components using Next.js `dynamic()` imports.
+## 🎵 Features
 
-### 📊 Bundle Comparison
+| ✨ Feature                      | ✅ Core Feature       | 🌟 Extra Feature       | 💬 Description |
+|-------------------------------|-----------------------|------------------------|----------------|
+| 🎼 Create Track (Without Audio) | <div align="center">✅</div> |                        | Modal for metadata input, optional cover image (with validation), metadata saved independently of audio |
+| ✏️ Edit Track Metadata          | <div align="center">✅</div> |                        | Pre-filled edit modal, automatically updates the track list |
+| 🎧 Upload Track Audio           | <div align="center">✅</div> |                        | Supports `.mp3` and `.wav`, validates type and size, replace/remove audio |
+| ❌ Delete Track                 | <div align="center">✅</div> |                        | Removes from frontend/backend with confirmation dialog |
+| 📜 Track List View              | <div align="center">✅</div> |                        | Paginated, sortable, debounced filtering, inline single-audio playback |
+| 🔥 Bulk Delete                  |                        | <div align="center">✅</div> | Select and delete multiple tracks at once |
+| ⚡ Optimistic UI Updates        |                        | <div align="center">✅</div> | Instant UI feedback before backend confirmation |
+| 📈 Waveform Visualization       |                        | <div align="center">✅</div> | Shows waveform for currently playing track |
 
-| Route         | Size                | First Load JS       | Notes                                   |
-| ------------- | ------------------- | ------------------- | --------------------------------------- |
-| `/`           | 175 B               | 105 kB              | No significant change                   |
-| `/_not-found` | 136 B               | 101 kB              | No significant change                   |
-| `/tracks`     | **138 kB → 103 kB** | **255 kB → 210 kB** | 🚀 Optimized by lazy loading components |
+## 🖼️ Music Track Management App Gallery
 
----
+This gallery showcases the **core functionality**, **interactive modals**, and overall **UX/UI** of the Music Track Management App. It includes examples of creating and editing tracks, uploading audio, using the audio player, applying filters, and managing the deletion process.
 
-### 📦 What Was Optimized?
+<table>
+  <tr>
+    <td>
+      <img src="https://github.com/user-attachments/assets/b92eab65-0866-45cc-9c66-2374d9fb2883" alt="Screenshot 1" width="100%" />
+    </td>
+    <td>
+      <img src="https://github.com/user-attachments/assets/c940e73c-5611-4347-9c1c-ba59321eb830" alt="Screenshot 2" width="100%" />
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">
+      <img src="https://github.com/user-attachments/assets/58ebdc2c-cee1-46c7-94e3-87f57f0078da" alt="Screenshot 3" width="100%" />
+    </td>
+  </tr>
+</table>
 
-On the `/tracks` page, the following large components and libraries were dynamically imported:
-
-```ts
-const AudioPlayer = dynamic(() =>
-  import('@/features/tracks/components/audio-player').then(mod => mod.AudioPlayer)
-);
-const TrackModal = dynamic(() =>
-  import('@/features/tracks/components/track-modal').then(mod => mod.TrackModal)
-);
-const DeleteTrackDialog = dynamic(() =>
-  import('@/features/tracks/components/delete-track-dialog').then(mod => mod.DeleteTrackDialog)
-);
-const UploadTrackModal = dynamic(() =>
-  import('@/features/tracks/components/upload-track-modal').then(mod => mod.UploadTrackModal)
-);
-```
-
-### ✅ Result
-
-* Reduced `/tracks` route size by **35 kB**
-* Reduced first load JS by **45 kB**
-* Improved performance and time to interactive for users visiting the `/tracks` route
-
-## ⚡ Performance Deep Dive
-  ![image](https://github.com/user-attachments/assets/cef34987-2d0c-4acf-ad3a-58df06852a4c)
-
+## ⚡ Performance
+  ![Performance](https://github.com/user-attachments/assets/cef34987-2d0c-4acf-ad3a-58df06852a4c)

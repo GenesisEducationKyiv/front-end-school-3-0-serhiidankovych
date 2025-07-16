@@ -1,7 +1,7 @@
 import { Github, Linkedin, Mail } from "lucide-react";
 import Link from "next/link";
 
-import ActiveTrackDisplay from "@/features/tracks/components/active-track";
+import ActiveTrackDisplay from "@/features/tracks/components/ui/active-track";
 
 export function Footer() {
   return (

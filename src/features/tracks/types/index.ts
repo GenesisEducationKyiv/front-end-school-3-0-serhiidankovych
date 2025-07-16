@@ -39,3 +39,12 @@ export interface TrackFilters {
   limit: number;
   order: string;
 }
+
+export interface SearchParams {
+  page?: string;
+  search?: string;
+  genre?: string;
+  artist?: string;
+  sort?: string;
+  order?: string;
+}

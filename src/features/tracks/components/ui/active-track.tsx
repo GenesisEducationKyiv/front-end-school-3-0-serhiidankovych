@@ -1,7 +1,6 @@
 "use client";
 import { Skeleton } from "@/components/ui/skeleton";
-
-import { useActiveTrack } from "../hooks/use-active-track";
+import { useActiveTrack } from "@/features/tracks/hooks/use-active-track";
 
 export default function ActiveTrackDisplay() {
   const { activeTrack, isLoading } = useActiveTrack();

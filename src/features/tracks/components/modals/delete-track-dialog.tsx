@@ -11,10 +11,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-import { useDeleteTracks } from "../hooks/use-delete-tracks";
-import { Track } from "../schemas/schemas";
-
+import { useDeleteTracks } from "@/features/tracks/hooks/use-delete-tracks";
+import { Track } from "@/features/tracks/schemas/schemas";
 
 interface DeleteTrackDialogProps {
   isOpen: boolean;
@@ -29,13 +27,12 @@ export function DeleteTrackDialog({
   tracksToDelete,
   onSuccess: parentOnSuccess,
 }: DeleteTrackDialogProps) {
-  
   const deleteMutation = useDeleteTracks();
-  
+
   const isDeleting = deleteMutation.isPending;
 
   const isMultiple = tracksToDelete.length > 1;
-  
+
   const handleDelete = () => {
     if (tracksToDelete.length === 0) {
       onClose();
@@ -48,20 +45,17 @@ export function DeleteTrackDialog({
     deleteMutation.mutate(
       { ids, trackTitles },
       {
-        
         onSuccess: () => {
-          parentOnSuccess(); 
+          parentOnSuccess();
           onClose();
         },
         onError: () => {
-
-          onClose(); 
+          onClose();
         },
       }
     );
   };
-  
-  
+
   const handleOpenChange = (open: boolean) => {
     if (!open && !isDeleting) {
       onClose();
@@ -74,7 +68,7 @@ export function DeleteTrackDialog({
 
   const dialogDescription = isMultiple
     ? `Are you sure you want to delete these ${tracksToDelete.length} tracks? This action cannot be undone.`
-    : `Are you sure you want to delete "${tracksToDelete[0]?.title || 'this track'}"? This action cannot be undone.`;
+    : `Are you sure you want to delete "${tracksToDelete[0]?.title || "this track"}"? This action cannot be undone.`;
 
   return (
     <AlertDialog

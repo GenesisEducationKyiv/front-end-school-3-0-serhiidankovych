@@ -5,9 +5,8 @@ import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-
-import { useAudioPlayer } from "../hooks/use-audio-player";
-import { Track } from "../schemas/schemas";
+import { useAudioPlayer } from "@/features/tracks/hooks/use-audio-player";
+import { Track } from "@/features/tracks/schemas/schemas";
 
 interface AudioPlayerProps {
   track: Track;

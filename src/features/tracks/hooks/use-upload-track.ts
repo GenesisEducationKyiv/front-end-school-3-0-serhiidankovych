@@ -18,7 +18,6 @@ export function useUploadTrack(track: Track | null, onSuccess: () => void) {
 
   const isMutating = uploadMutation.isPending || removeMutation.isPending;
 
-  // Update audio URL when track changes
   useEffect(() => {
     setAudioUrl(O.toNullable(api.getTrackAudioUrl(track?.audioFile ?? null)));
   }, [track?.audioFile]);
@@ -99,20 +98,16 @@ export function useUploadTrack(track: Track | null, onSuccess: () => void) {
   };
 
   return {
-    // State
     uploadProgress,
     selectedFile,
     audioUrl,
     isMutating,
 
-    // Refs
     fileInputRef,
 
-    // Mutations
     uploadMutation,
     removeMutation,
 
-    // Handlers
     handleFileChange,
     handleBrowseClick,
     handleClearSelection,
@@ -120,7 +115,6 @@ export function useUploadTrack(track: Track | null, onSuccess: () => void) {
     handleRemoveFile,
     resetState,
 
-    // Utilities
     formatFileSize,
   };
 }

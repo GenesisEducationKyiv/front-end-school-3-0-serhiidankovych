@@ -10,9 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import { useTrackFilters } from "../hooks/use-track-filters";
-import { ComponentTrackFilters } from "../types";
+import { useTrackFilters } from "@/features/tracks/hooks/use-track-filters";
+import { ComponentTrackFilters } from "@/features/tracks/types";
 
 interface TrackFiltersProps {
   filters: ComponentTrackFilters;
