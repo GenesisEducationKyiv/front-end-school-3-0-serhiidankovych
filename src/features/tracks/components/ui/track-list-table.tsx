@@ -75,6 +75,7 @@ export function TrackListTable({
               key={track.id}
               track={track}
               isSelected={selectedTrackIds.has(track.id)}
+              isSelectionMode={isSelectionMode}
               {...props}
             />
           ))}
