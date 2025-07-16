@@ -1,3 +1,6 @@
+// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
+import storybook from "eslint-plugin-storybook";
+
 import { FlatCompat } from "@eslint/eslintrc";
 import js from "@eslint/js";
 import importPlugin from "eslint-plugin-import";
@@ -22,9 +25,7 @@ const compat = new FlatCompat({
 // eslint-disable-next-line import/no-anonymous-default-export
 export default [
   globalIgnores(["node_modules/", ".next/", "dist/", "build/"]),
-
   ...compat.extends("next/core-web-vitals", "next/typescript"),
-
   {
     files: ["**/*.{js,ts,jsx,tsx}"],
     ignores: ["node_modules", ".next", "dist", "build"],
@@ -49,4 +50,5 @@ export default [
       "react-hooks/exhaustive-deps": "off",
     },
   },
+  ...storybook.configs["flat/recommended"]
 ];
