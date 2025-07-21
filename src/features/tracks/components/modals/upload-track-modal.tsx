@@ -10,9 +10,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
+import { useUploadTrack } from "@/features/tracks/hooks/use-upload-track";
 import { Track } from "@/features/tracks/schemas/schemas";
-
-import { useUploadTrack } from "../hooks/use-upload-track";
 
 interface UploadTrackModalProps {
   isOpen: boolean;

@@ -2,15 +2,15 @@ import { Rocket } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Button } from "../components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
-import { features } from "../data/features";
+} from "@/components/ui/card";
+import { features } from "@/data/features";
 
 export default function Home() {
   return (
