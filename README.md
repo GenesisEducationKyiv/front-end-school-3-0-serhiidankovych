@@ -1,44 +1,30 @@
 # 🎵 Music Track Management App
-<table>
-<tr>
-  <td width="35%" valign="top">
-    <img src="https://github.com/user-attachments/assets/247351f9-93ff-4975-9d59-a5d5b07c1cd1" alt="Music Track Management App" width="100%" />
-  </td>
-  <td valign="top" style="padding-left: 20px;">
-    <!-- Header -->
-    <table style="border: none; width: 100%;">
-      <tr>
-        <td valign="center">
-          <img width="90" alt="logo" src="https://github.com/user-attachments/assets/4f87fa4c-5a18-4757-91fd-20b2ff9b45ea" />
-        </td>
-        <td valign="middle" style="padding-left: 15px;">
-          <h2 style="margin-bottom: 0;">Music Hive</h2>
-        </td>
-        <td>
- <p>
-      <a href="https://skillicons.dev">
-        <img src="https://skillicons.dev/icons?i=nextjs,ts,react,graphql,tailwind," />
-      </a>
-    </p>
-</td>
-      </tr>
-    </table>
-  <p>A modern frontend application for managing music tracks, originally developed for the Front-End School 3.0 challenge. It has since been refined through extensive code reviews.</p>
-<h4>Core Features:</h4>
-<ul>
-<li><b>Full CRUD:</b> Create, edit, and delete music tracks.</li>
-<li><b>File Handling:</b> Upload audio files directly.</li>
-<li><b>Playback:</b> Listen to tracks with inline audio playback.</li>
-<li><b>Data Management:</b> Powerful search, filter, and sort functionalities.</li>
-</ul>
-  </td>
-</tr>
+
+<table style="width: 100%;">
+  <tr>
+    <td width="50%" valign="top">
+      <img src="https://github.com/user-attachments/assets/247351f9-93ff-4975-9d59-a5d5b07c1cd1" alt="Music Track Management App" width="100%" />
+    </td>
+    <td width="50%" valign="top" style="padding-left: 20px;">
+      <h2>Music Hive</h2>
+      <p>
+        A modern frontend application for managing music tracks, originally developed for the Front-End School 3.0 challenge. It has since been refined through extensive code reviews.
+      </p>
+      <h4>Core Features:</h4>
+      <ul>
+        <li><b>Full CRUD:</b> Create, edit, and delete music tracks.</li>
+        <li><b>File Handling:</b> Upload audio files directly.</li>
+        <li><b>Playback:</b> Listen to tracks with inline audio playback.</li>
+        <li><b>Data Management:</b> Powerful search, filter, and sort functionalities.</li>
+      </ul>
+      <p>
+        <a href="https://skillicons.dev">
+          <img src="https://skillicons.dev/icons?i=nextjs,ts,react,graphql,tailwind" />
+        </a>
+      </p>
+    </td>
+  </tr>
 </table>
-
-  
-
-
-    
 
 <br>
 
