@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { api } from "@/features/tracks/api/api";
-import { RelatedTracks } from "@/features/tracks/components/ui/related.tracks";
+import { RelatedTracks } from "@/features/tracks/components/ui/related-tracks";
 import { Track } from "@/features/tracks/schemas/schemas";
 import { useAudioPlayerStore } from "@/features/tracks/store/use-audio-player-store";
 
