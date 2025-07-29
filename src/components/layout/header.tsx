@@ -1,5 +1,4 @@
 "use client";
-
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -50,54 +49,68 @@ export function Header() {
             </Link>
           </div>
 
-          <nav className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-sm font-medium text-foreground/90 hover:text-primary transition-colors duration-200 relative group"
-              >
-                {item.name}
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-              </Link>
-            ))}
+          <nav
+            className="hidden md:flex items-center"
+            aria-label="Main navigation"
+          >
+            <ul className="flex items-center space-x-8">
+              {navItems.map((item) => (
+                <li key={item.name}>
+                  <Link
+                    href={item.href}
+                    className="text-sm font-medium text-foreground/90 hover:text-primary transition-colors duration-200 relative group"
+                  >
+                    {item.name}
+                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </nav>
 
           <div className="flex md:hidden">
             <button
               type="button"
-              className="inline-flex items-center justify-center p-2 rounded-md text-foreground/80 hover:text-primary focus:outline-none"
+              className="inline-flex items-center justify-center p-2 rounded-md text-foreground/80 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle menu"
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
             >
               {mobileMenuOpen ? (
-                <X className="h-6 w-6" />
+                <X className="h-6 w-6" aria-hidden="true" />
               ) : (
-                <Menu className="h-6 w-6" />
+                <Menu className="h-6 w-6" aria-hidden="true" />
               )}
             </button>
           </div>
         </div>
       </div>
 
-      <div
+      <nav
+        id="mobile-menu"
         className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
           mobileMenuOpen ? "max-h-96" : "max-h-0"
         }`}
+        aria-label="Mobile navigation"
+        aria-hidden={!mobileMenuOpen}
       >
-        <div className="px-2 pt-2 pb-4 space-y-2 border-t">
-          {navItems.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className="block px-3 py-3 rounded-md text-base font-medium text-foreground/90 hover:bg-accent transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {item.name}
-            </Link>
-          ))}
+        <div className="px-2 pt-2 pb-4 border-t">
+          <ul className="space-y-2">
+            {navItems.map((item) => (
+              <li key={item.name}>
+                <Link
+                  href={item.href}
+                  className="block px-3 py-3 rounded-md text-base font-medium text-foreground/90 hover:bg-accent transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
+      </nav>
     </header>
   );
 }

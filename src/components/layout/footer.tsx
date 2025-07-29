@@ -17,26 +17,35 @@ export function Footer() {
           </p>
         </div>
 
-        <div className="flex items-center gap-4">
-          <Link
-            href="https://github.com/serhiidankovych"
-            aria-label="GitHub profile"
-            target="_blank"
-          >
-            <Github className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
-          </Link>
-
-          <Link href="mailto:serhiidankovych@gmail.com" aria-label="Email">
-            <Mail className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
-          </Link>
-          <Link
-            href="https://www.linkedin.com/in/serhii-dankovych-706642255/"
-            aria-label="LinkedIn profile"
-            target="_blank"
-          >
-            <Linkedin className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
-          </Link>
-        </div>
+        <nav aria-label="Social media links">
+          <ul className="flex items-center gap-4">
+            <li>
+              <Link
+                href="https://github.com/serhiidankovych"
+                aria-label="GitHub profile"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Github className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
+              </Link>
+            </li>
+            <li>
+              <Link href="mailto:serhiidankovych@gmail.com" aria-label="Email">
+                <Mail className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="https://www.linkedin.com/in/serhii-dankovych-706642255/"
+                aria-label="LinkedIn profile"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Linkedin className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
+              </Link>
+            </li>
+          </ul>
+        </nav>
       </div>
     </footer>
   );
