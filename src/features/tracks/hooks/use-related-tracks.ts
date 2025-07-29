@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-import { api } from "@/features/tracks/api/api";
+import { api } from "@/features/tracks/api";
 import { Track } from "@/features/tracks/schemas/schemas";
 
-export function useRelatedTracks(artist?: string, limit = 5) {
+export function useRelatedTracksQuery(artist?: string, limit = 5) {
   const { data, ...rest } = useQuery({
     queryKey: ["tracks", { artist, limit }],
     queryFn: () =>

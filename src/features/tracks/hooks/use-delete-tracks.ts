@@ -1,15 +1,15 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { api, ApiError } from "../api/api";
+import { api, ApiError } from "@/features/tracks/api";
 import {
   MultipleDeleteResponse,
   SingleDeleteResponse,
-} from "../schemas/schemas";
+} from "@/features/tracks/schemas/schemas";
 
 type DeleteVariables = { ids: string[]; trackTitles: string[] };
 
-export const useDeleteTracks = () => {
+export const useDeleteTracksMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation<

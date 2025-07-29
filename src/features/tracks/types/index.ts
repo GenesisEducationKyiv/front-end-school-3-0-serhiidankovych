@@ -48,3 +48,8 @@ export interface SearchParams {
   sort?: string;
   order?: string;
 }
+
+export interface ApiError {
+  error: string;
+  message: string;
+}

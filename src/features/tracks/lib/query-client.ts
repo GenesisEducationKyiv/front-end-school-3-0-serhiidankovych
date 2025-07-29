@@ -1,6 +1,6 @@
 import { createServerQueryClient } from "@/config/query-client";
+import { api } from "@/features/tracks/api";
 
-import { api } from "../api/api";
 import { ComponentTrackFilters } from "../types";
 
 export async function prefetchTracks(

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { api } from "../api/api";
+import { api } from "@/features/tracks/api";
 
 export function useActiveTrack() {
   const [activeTrack, setActiveTrack] = useState<string | null>(null);

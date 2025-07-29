@@ -1,11 +1,10 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 
+import { api } from "@/features/tracks/api";
+import { PaginatedTrackResponse } from "@/features/tracks/schemas/schemas";
+import { ApiError, ComponentTrackFilters } from "@/features/tracks/types";
 import { useDebounce } from "@/hooks/use-debounce";
-
-import { api, ApiError } from "../api/api";
-import { PaginatedTrackResponse } from "../schemas/schemas";
-import { ComponentTrackFilters } from "../types";
 
 export const ITEMS_PER_PAGE = 10;
 
