@@ -80,6 +80,14 @@ Performance and accessibility were key priorities. The following optimizations w
    
   ![Performance](https://github.com/user-attachments/assets/cef34987-2d0c-4acf-ad3a-58df06852a4c)
   
+  <br>
+  
+## 📦 Build
+The app uses a **hybrid rendering strategy** to optimize performance and flexibility. The homepage and error page are **statically generated** for fast load times. The `/tracks` route is **server-side rendered** to handle dynamic logic or authentication. Individual track pages (`/tracks/[id]`) are **statically generated at build time**, providing excellent performance and SEO benefits.
+
+ ![Build](https://github.com/user-attachments/assets/7448aa12-077f-4532-bfb0-cf7eb32de2c9)
+  
+
 <br>
 
 ## 🚀 Getting Started
