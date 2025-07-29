@@ -1,6 +1,5 @@
 import { APP_CONFIG } from "@/config/app";
-
-import { api } from "../api/api";
+import { api } from "@/features/tracks/api";
 
 export async function generateTrackStaticParams() {
   try {
