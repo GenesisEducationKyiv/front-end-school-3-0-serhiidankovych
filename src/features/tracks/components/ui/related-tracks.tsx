@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useRelatedTracks } from "@/features/tracks/hooks/use-related-tracks";
+import { useRelatedTracksQuery } from "@/features/tracks/hooks/use-related-tracks";
 import { useAudioPlayerStore } from "@/features/tracks/store/use-audio-player-store";
 
 interface RelatedTracksProps {
@@ -15,7 +15,7 @@ interface RelatedTracksProps {
 }
 
 export function RelatedTracks({ artist, currentTrackId }: RelatedTracksProps) {
-  const { tracks, isLoading } = useRelatedTracks(artist);
+  const { tracks, isLoading } = useRelatedTracksQuery(artist);
   const { handlePlay } = useAudioPlayerStore();
 
   if (tracks.length === 1 && !isLoading) return null;

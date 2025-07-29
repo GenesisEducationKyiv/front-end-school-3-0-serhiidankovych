@@ -2,7 +2,7 @@
 import { AlertCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { ApiError } from "@/features/tracks/api/api";
+import { ApiError } from "@/features/tracks/api";
 
 interface TracksErrorBannerProps {
   error: ApiError | null;
