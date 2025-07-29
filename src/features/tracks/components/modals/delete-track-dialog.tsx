@@ -11,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useDeleteTracks } from "@/features/tracks/hooks/use-delete-tracks";
+import { useDeleteTracksMutation } from "@/features/tracks/hooks/use-delete-tracks";
 import { Track } from "@/features/tracks/schemas/schemas";
 
 interface DeleteTrackDialogProps {
@@ -27,7 +27,7 @@ export function DeleteTrackDialog({
   tracksToDelete,
   onSuccess: parentOnSuccess,
 }: DeleteTrackDialogProps) {
-  const deleteMutation = useDeleteTracks();
+  const deleteMutation = useDeleteTracksMutation();
 
   const isDeleting = deleteMutation.isPending;
 

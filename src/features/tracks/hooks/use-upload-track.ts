@@ -2,10 +2,13 @@ import { O } from "@mobily/ts-belt";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
+import { api } from "@/features/tracks/api";
 import { Track } from "@/features/tracks/schemas/schemas";
 
-import { api } from "../api/api";
-import { useRemoveTrackAudio, useUploadTrackAudio } from "./use-track-audio";
+import {
+  useRemoveTrackAudioMutation,
+  useUploadTrackAudioMutation,
+} from "./use-track-audio";
 
 export function useUploadTrack(track: Track | null, onSuccess: () => void) {
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -13,8 +16,8 @@ export function useUploadTrack(track: Track | null, onSuccess: () => void) {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const uploadMutation = useUploadTrackAudio();
-  const removeMutation = useRemoveTrackAudio();
+  const uploadMutation = useUploadTrackAudioMutation();
+  const removeMutation = useRemoveTrackAudioMutation();
 
   const isMutating = uploadMutation.isPending || removeMutation.isPending;
 

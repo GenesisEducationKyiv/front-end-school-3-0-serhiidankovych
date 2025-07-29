@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { api, ApiError } from "../api/api";
-import { Track } from "../schemas/schemas";
+import { api, ApiError } from "@/features/tracks/api";
+import { Track } from "@/features/tracks/schemas/schemas";
 
-export const useUploadTrackAudio = () => {
+export const useUploadTrackAudioMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -32,7 +32,7 @@ export const useUploadTrackAudio = () => {
   });
 };
 
-export const useRemoveTrackAudio = () => {
+export const useRemoveTrackAudioMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation<Track, ApiError, string>({

@@ -3,11 +3,7 @@ import { useRouter } from "next/navigation";
 
 import { Track } from "@/features/tracks/schemas/schemas";
 import { useAudioPlayerStore } from "@/features/tracks/store/use-audio-player-store";
-import {
-  ComponentTrackFilters,
-  TrackOrder,
-  TrackSort,
-} from "@/features/tracks/types";
+import { ComponentTrackFilters } from "@/features/tracks/types";
 
 interface UseTracksPageActionsProps {
   filters: ComponentTrackFilters;

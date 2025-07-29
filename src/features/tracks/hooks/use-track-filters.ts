@@ -1,8 +1,8 @@
 import { D } from "@mobily/ts-belt";
 import { useCallback, useMemo } from "react";
 
-import { useGenres } from "../hooks/use-genres";
-import { ComponentTrackFilters } from "../types";
+import { useGenresQuery } from "@/features/tracks/hooks/use-genres";
+import { ComponentTrackFilters } from "@/features/tracks/types";
 
 const SORT_OPTIONS = [
   { field: "title", direction: "asc", label: "Title (A-Z)" },
@@ -26,7 +26,7 @@ export function useTrackFilters(
   filters: ComponentTrackFilters,
   updateFilters: (filters: Partial<ComponentTrackFilters>) => void
 ) {
-  const { data: genres = [], isLoading: isLoadingGenres } = useGenres();
+  const { data: genres = [], isLoading: isLoadingGenres } = useGenresQuery();
 
   const hasActiveFilters = useMemo(
     () => D.values(filters).some((v) => v !== undefined && v !== ""),

@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { api, ApiError } from "../api/api";
+import { api, ApiError } from "@/features/tracks/api";
+
 import { Track, TrackFormData } from "../schemas/schemas";
 
 type SaveTrackVariables = {
@@ -9,7 +10,7 @@ type SaveTrackVariables = {
   id?: string;
 };
 
-export const useSaveTrack = () => {
+export const useSaveTrackMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation<Track, ApiError, SaveTrackVariables>({

@@ -2,8 +2,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import { useGenres } from "../hooks/use-genres";
-import { TrackFormData, TrackFormSchema } from "../schemas/schemas";
+import { useGenresQuery } from "@/features/tracks/hooks/use-genres";
+import {
+  TrackFormData,
+  TrackFormSchema,
+} from "@/features/tracks/schemas/schemas";
 
 interface UseTrackFormProps {
   initialData?: Partial<TrackFormData>;
@@ -42,7 +45,7 @@ export function useTrackForm({
     isError: isErrorGenres,
     error: genresError,
     refetch: refetchGenres,
-  } = useGenres();
+  } = useGenresQuery();
 
   const coverImageUrl = form.watch("coverImage");
 

@@ -15,7 +15,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Track, TrackFormData } from "@/features/tracks/schemas/schemas";
 
-import { useSaveTrack } from "../../hooks/use-save-track";
+import { useSaveTrackMutation } from "../../hooks/use-save-track";
 import { TrackForm } from "../ui/track-form";
 
 interface TrackModalProps {
@@ -33,7 +33,7 @@ export function TrackModal({
   onSuccess: parentOnSuccess,
   mode,
 }: TrackModalProps) {
-  const saveTrackMutation = useSaveTrack();
+  const saveTrackMutation = useSaveTrackMutation();
 
   const isSubmitting = saveTrackMutation.isPending;
   const error = saveTrackMutation.error?.message;

@@ -2,8 +2,8 @@ import { useWavesurfer } from "@wavesurfer/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { api } from "../api/api";
-import { Track } from "../schemas/schemas";
+import { api } from "@/features/tracks/api";
+import { Track } from "@/features/tracks/schemas/schemas";
 
 export function useAudioPlayer({
   track,
